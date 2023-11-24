@@ -1,0 +1,145 @@
+#answersPage {
+    position: relative;
+    display: flex;
+    right: 0;
+    bottom: 0;
+    width: 80%;
+    left: 20%;
+}
+
+.answersContainer {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.answersPageHeader {
+    top: 0;
+    margin-top: 2%;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    font-weight: bold;
+}
+
+.headerContent {
+    display: flex;
+    font-family: sans-serif;
+    gap: 150px;
+    font-size: 20px;
+    flex-direction: row;
+}
+
+#numberOfAnswers {
+    margin-left: 2%;
+    width: 120px;
+}
+
+#questionTitle {
+    width: 500px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#questionWrapper .questionBox {
+    font-size: 16px;
+    font-family: sans-serif;
+    border-style: dotted;
+    border-width: 2px;
+    border-color: black;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    display: flex;
+    justify-content: space-between;
+    width: fit-content;
+}
+
+.questionNumViews {
+    font-weight: bold;
+    margin-left: 20px;
+    font-family: sans-serif;
+    width: 100px;
+}
+
+.questionText {
+    font-family: sans-serif;
+    font-size: 16px;
+    margin-bottom: 20px;
+    width: 700px;
+    margin-left: 50px;
+}
+
+.askedByName {
+    margin-left: 50px;
+    color: red;
+    font-size: 16px;
+    margin-right: 25px;
+    font-family: sans-serif
+}
+
+.askedByTime {
+    margin-left: 0px;
+    color: gray;
+    font-size: 14px;
+    margin-right: 25px;
+    font-family: sans-serif;
+}
+
+#answersWrapper {
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    flex: 1;
+    margin-bottom: 10px;
+}
+
+#answersWrapper .answerBox {
+    font-size: 16px;
+    font-family: sans-serif;
+    border-style: dotted;
+    border-width: 2px;
+    border-color: black;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+#answerQuestionButton {
+    background-color: dodgerblue;
+    color:white;
+    border: 1.5px solid black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    width: 200px;
+    margin-left: 10px;
+    /* position: fixed; */
+    bottom: 15px;
+}
+
+.answerText {
+    margin-left: 20px;
+    width: 900px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.answeredByName {
+    margin-left: 50px;
+    color: green;
+    font-size: 12px;
+    margin-right: 25px;
+}
+
+.answeredByTime {
+    margin-left: 50px;
+    color: gray;
+    font-size: 12px;
+    margin-right: 25px;
+}
