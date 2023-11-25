@@ -243,25 +243,12 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
                         {passwordError}
                     </label>
                 </div>
-                {/* Log In button */}
                 <span>
                     <input type="submit" id="loginButton" value="Log In" onClick={handleSubmit} />
                 </span>
-                {/* Go Back button */}
                 <span>
                     <input type="button" id="goBackButton" value="Go Back" onClick={() => setIsLoggingIn(false)} />
                 </span>
-
-                {/* <div style={{ display: "flex", justifyContent: "center" }}>
-                    <button id="loginButton" type="submit">
-                        Log In
-                    </button>
-                </div>
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                    <button id="goBackButton" onClick={() => setIsLoggingIn(false)}>
-                        Go Back
-                    </button>
-                </div> */}
             </form>
         </div>
     );
@@ -358,7 +345,6 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
     return (
         <div className="createAccountForm">
             <form onSubmit={handleSubmit}>
-                {/* Username input */}
                 <div id="usernameDiv">
                     <label
                         htmlFor="username"
@@ -389,7 +375,6 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
                         {usernameError}
                     </label>
                 </div>
-                {/* Email input */}
                 <div id="emailDiv">
                     <label
                         htmlFor="email"
@@ -420,7 +405,6 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
                         {emailError}
                     </label>
                 </div>
-                {/* Password input */}
                 <div id="passwordDiv">
                     <label
                         htmlFor="password"
@@ -451,7 +435,6 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
                         {passwordError}
                     </label>
                 </div>
-                {/* Password verification input */}
                 <div id="passwordVerificationDiv">
                     <label
                         htmlFor="passwordVerification"
@@ -482,11 +465,9 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
                         {passwordVerificationError}
                     </label>
                 </div>
-                {/* Create Account button */}
                 <span>
                     <input type="submit" id="loginButton" value="Create Account" onClick={handleSubmit} />
                 </span>
-                {/* Go Back button */}
                 <span>
                     <input
                         type="button"

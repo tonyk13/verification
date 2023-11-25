@@ -14,7 +14,6 @@ const authRoutes = require("./routes/authRoutes");
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 
-// app.use(cors());
 app.use(
     cors({
         origin: "http://localhost:3000",
