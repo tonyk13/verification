@@ -80,6 +80,7 @@ function App() {
             }
         } else {
             setIsGuest(false);
+            Cookie.remove("auth");
             setCurrentPage("welcomePage");
         }
     };
