@@ -18,10 +18,7 @@ module.exports.CreateAccount = async (req, res, next) => {
             answers,
             comments,
         });
-        res.cookie("loggedInUser", user._id, {
-            httpOnly: true,
-            /* secure: true,*/
-        });
+        res.cookie("loggedInUser", user._id, {});
         res.status(201).json({
             message: "User signed in successfully",
             success: true,
@@ -51,17 +48,19 @@ module.exports.Login = async (req, res, next) => {
             return res.json({ message: "Incorrect password", success: false });
         }
 
-        req.session.loggedInUser = user._id;
-
         res.cookie("loggedInUser", user._id, {
-            httpOnly: true,
-            /* secure: true, */
+            httpOnly: false,
+            secure: false,
+            sameSite: "none",
+            domain: "localhost:3000",
+            path: "/",
         });
+
         res.status(201).json({
             message: "User logged in successfully",
             success: true,
         });
-        console.log(req.session.loggedInUser);
+
         next();
     } catch (error) {
         console.error(error);
@@ -82,16 +81,13 @@ module.exports.LoggedIn = async (req, res) => {
     try {
         const loggedInUserID = req.cookies.loggedInUser;
 
-        console.log("loggedInUserID:", loggedInUserID);
-
         if (loggedInUserID) {
-            return res.json({ status: true, message: "User is logged in" });
+            return res.json({ status: true, message: "User is logged in", loggedInUserID });
         } else {
             return res.json({ status: false, message: "User is not logged in" });
         }
     } catch (error) {
         console.error(error);
-        // res.status(500).json({ message: "Error checking login status" });
         res.status(500).json({ message: error.message });
     }
 };

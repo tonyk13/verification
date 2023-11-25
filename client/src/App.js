@@ -1,6 +1,3 @@
-// ************** THIS IS YOUR APP'S ENTRY POINT. CHANGE THIS FILE AS NEEDED. **************
-// ************** DEFINE YOUR REACT COMPONENTS in ./components directory **************
-
 import { React, useState, useEffect } from "react";
 import Header from "./components/Header/Header.js";
 import Sidebar from "./components/Sidebar/Sidebar.js";
@@ -11,6 +8,7 @@ import AskQuestionPage from "./components/AskQuestionPage/AskQuestionPage.js";
 import NewAnswerPage from "./components/NewAnswerPage/NewAnswerPage.js";
 import WelcomePage from "./components/WelcomePage/WelcomePage.js";
 import axios from "axios";
+import Cookie from "js-cookie";
 
 function App() {
     const [currentPage, setCurrentPage] = useState("welcomePage");
@@ -22,6 +20,21 @@ function App() {
     const [tagClicked, setTagClicked] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isGuest, setIsGuest] = useState(false);
+
+    useEffect(() => {
+        const user = Cookie.get("auth");
+        if (user) {
+            console.log("THERE IS A USER IN THE COOKIE:", user);
+            if (user !== "GUEST") {
+                setIsLoggedIn(true);
+            } else {
+                setIsGuest(true);
+            }
+            setCurrentPage("questionsPage");
+        } else {
+            console.log("NO USER IN THE COOKIE");
+        }
+    }, []);
 
     useEffect(() => {
         const fetchQuestions = async () => {
@@ -57,6 +70,7 @@ function App() {
                 console.log(response.data);
 
                 if (response.data.success) {
+                    Cookie.remove("auth");
                     setIsLoggedIn(false);
                     setCurrentPage("welcomePage");
                     console.log("Logged out successfully!");
@@ -71,145 +85,69 @@ function App() {
     };
 
     const renderCurrentPage = () => {
-        // if (currentPage === "welcomePage") {
-        //     return <WelcomePage setCurrentPage={setCurrentPage} setIsLoggedIn={setIsLoggedIn} />;
-        // } else if (currentPage === "questionsPage") {
-        //     return (
-        //         <QuestionsPage
-        //             setSelectedQuestion={setSelectedQuestion}
-        //             questions={questions}
-        //             setCurrentPage={setCurrentPage}
-        //             currentSearch={currentSearch}
-        //             setSearch={setSearch}
-        //             tags={tags}
-        //             databaseUpdateTrigger={databaseUpdateTrigger}
-        //             tagClicked={tagClicked}
-        //             setTagClicked={setTagClicked}
-        //         />
-        //     );
-        // } else if (currentPage === "tagsPage") {
-        //     return (
-        //         <TagsPage
-        //             questions={questions}
-        //             tags={tags}
-        //             setCurrentPage={setCurrentPage}
-        //             currentSearch={currentSearch}
-        //             setSearch={setSearch}
-        //             databaseUpdateTrigger={databaseUpdateTrigger}
-        //             currentPage={currentPage}
-        //             setTagClicked={setTagClicked}
-        //         />
-        //     );
-        // } else if (currentPage === "askQuestionPage") {
-        //     return (
-        //         <AskQuestionPage
-        //             setCurrentPage={setCurrentPage}
-        //             setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-        //             tags={tags}
-        //         />
-        //     );
-        // } else if (currentPage === "newAnswerPage") {
-        //     return (
-        //         <NewAnswerPage
-        //             selectedQuestion={selectedQuestion}
-        //             setCurrentPage={setCurrentPage}
-        //             setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-        //         />
-        //     );
-        // } else if (currentPage === "answersPage") {
-        //     return (
-        //         <AnswersPage
-        //             selectedQuestion={selectedQuestion}
-        //             setCurrentPage={setCurrentPage}
-        //             setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-        //         />
-        //     );
-        // }
-
-        if (!isLoggedIn && !isGuest) {
+        if (currentPage === "questionsPage") {
             return (
-                <WelcomePage
+                <QuestionsPage
+                    setSelectedQuestion={setSelectedQuestion}
+                    questions={questions}
                     setCurrentPage={setCurrentPage}
-                    setIsLoggedIn={setIsLoggedIn}
-                    isGuest={isGuest}
-                    setIsGuest={setIsGuest}
+                    currentSearch={currentSearch}
+                    setSearch={setSearch}
+                    tags={tags}
+                    databaseUpdateTrigger={databaseUpdateTrigger}
+                    tagClicked={tagClicked}
+                    setTagClicked={setTagClicked}
                 />
             );
-        } else {
-            if (currentPage === "questionsPage") {
-                return (
-                    <QuestionsPage
-                        setSelectedQuestion={setSelectedQuestion}
-                        questions={questions}
-                        setCurrentPage={setCurrentPage}
-                        currentSearch={currentSearch}
-                        setSearch={setSearch}
-                        tags={tags}
-                        databaseUpdateTrigger={databaseUpdateTrigger}
-                        tagClicked={tagClicked}
-                        setTagClicked={setTagClicked}
-                    />
-                );
-            } else if (currentPage === "tagsPage") {
-                return (
-                    <TagsPage
-                        questions={questions}
-                        tags={tags}
-                        setCurrentPage={setCurrentPage}
-                        currentSearch={currentSearch}
-                        setSearch={setSearch}
-                        databaseUpdateTrigger={databaseUpdateTrigger}
-                        currentPage={currentPage}
-                        setTagClicked={setTagClicked}
-                    />
-                );
-            } else if (currentPage === "askQuestionPage") {
-                return (
-                    <AskQuestionPage
-                        setCurrentPage={setCurrentPage}
-                        setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-                        tags={tags}
-                    />
-                );
-            } else if (currentPage === "newAnswerPage") {
-                return (
-                    <NewAnswerPage
-                        selectedQuestion={selectedQuestion}
-                        setCurrentPage={setCurrentPage}
-                        setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-                    />
-                );
-            } else if (currentPage === "answersPage") {
-                return (
-                    <AnswersPage
-                        selectedQuestion={selectedQuestion}
-                        setCurrentPage={setCurrentPage}
-                        setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-                    />
-                );
-            }
+        } else if (currentPage === "tagsPage") {
+            return (
+                <TagsPage
+                    questions={questions}
+                    tags={tags}
+                    setCurrentPage={setCurrentPage}
+                    currentSearch={currentSearch}
+                    setSearch={setSearch}
+                    databaseUpdateTrigger={databaseUpdateTrigger}
+                    currentPage={currentPage}
+                    setTagClicked={setTagClicked}
+                />
+            );
+        } else if (currentPage === "askQuestionPage") {
+            return (
+                <AskQuestionPage
+                    setCurrentPage={setCurrentPage}
+                    setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                    tags={tags}
+                />
+            );
+        } else if (currentPage === "newAnswerPage") {
+            return (
+                <NewAnswerPage
+                    selectedQuestion={selectedQuestion}
+                    setCurrentPage={setCurrentPage}
+                    setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                />
+            );
+        } else if (currentPage === "answersPage") {
+            return (
+                <AnswersPage
+                    selectedQuestion={selectedQuestion}
+                    setCurrentPage={setCurrentPage}
+                    setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                />
+            );
         }
     };
 
-    // if (currentPage !== "welcomePage") {
-    //     return (
-    //         <div className="app">
-    //             <Header setSearch={setSearch} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-    //             <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-    //             <div className="content">{renderCurrentPage()}</div>
-    //         </div>
-    //     );
-    // } else {
-    //     return (
-    //         <div className="app">
-    //             <div className="content">{renderCurrentPage()}</div>
-    //         </div>
-    //     );
-    // }
-
-    if (!isLoggedIn && !isGuest) {
-        return (
-            <div className="app">
+    return (
+        <div className="app">
+            {isLoggedIn || isGuest ? (
+                <div className="page">
+                    <Header setSearch={setSearch} handleLogout={handleLogout} isGuest={isGuest} />
+                    <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    <div className="content">{renderCurrentPage()}</div>
+                </div>
+            ) : (
                 <div className="content">
                     <WelcomePage
                         setCurrentPage={setCurrentPage}
@@ -218,17 +156,9 @@ function App() {
                         setIsGuest={setIsGuest}
                     />
                 </div>
-            </div>
-        );
-    } else {
-        return (
-            <div className="app">
-                <Header setSearch={setSearch} handleLogout={handleLogout} isGuest={isGuest} />
-                <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-                <div className="content">{renderCurrentPage()}</div>
-            </div>
-        );
-    }
+            )}
+        </div>
+    );
 }
 
 export default App;

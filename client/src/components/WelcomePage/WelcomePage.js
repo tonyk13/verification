@@ -1,6 +1,7 @@
 import { React, useState } from "react";
 import axios from "axios";
 import "./WelcomePage.css";
+import Cookie from "js-cookie";
 
 function WelcomePage({ setCurrentPage, setIsLoggedIn, isGuest, setIsGuest }) {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -84,6 +85,7 @@ function WelcomePageBox({
         setCurrentPage("questionsPage");
         setIsLoggedIn(false);
         setIsGuest(true);
+        Cookie.set("auth", "GUEST", { expires: 7 });
         console.log("Continuing as guest...");
     }
 
@@ -168,6 +170,8 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
                 setCurrentPage("questionsPage");
 
                 console.log("Successfully logged in");
+
+                Cookie.set("auth", email, { expires: 7 });
 
                 return;
             }
