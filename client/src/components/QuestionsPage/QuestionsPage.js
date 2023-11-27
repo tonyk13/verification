@@ -135,16 +135,35 @@ function formatDate(dateString) {
     }
 }
 
+//getQuestionsBasedOnPageNumber
+function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber) {
+    const questionPageSize = 5;
+    let startIndex = (questionPageNumber - 1) * questionPageSize;
+    let endIndex = startIndex + questionPageSize;
+    if (startIndex > questions.length){
+        startIndex = 0;
+        endIndex = 4;
+        setQuestionPageNumber(1)
+    }
+    if (endIndex > questions.length) {
+        endIndex = questions.length;
+    }
+    let questionsBasedOnPageNumber = [...questions].slice(startIndex, endIndex);
+    return questionsBasedOnPageNumber;
+}
 //All Questions
 function renderAllQuestions(
     questions,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray, 
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
-
-    return questions.map((question) => (
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber);
+   
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -161,7 +180,7 @@ function renderAllQuestions(
     ));
 }
 
-//
+//getQuestionFromAnswer
 function getQuestionfromAnswer(questionsArray, answerID) {
     for (const q of questionsArray) {
         for (const a of q.answers) {
@@ -195,10 +214,13 @@ function renderActiveQuestions(
     answers,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     let activeQuestions = activeSort(questions, answers);
-    return activeQuestions.map((question) => (
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(activeQuestions, questionPageNumber, setQuestionPageNumber);
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -219,7 +241,9 @@ function renderUnansweredQuestions(
     questions,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
@@ -230,7 +254,9 @@ function renderUnansweredQuestions(
     if (unansweredQuestions.length === 0) {
         return "No Questions Found";
     }
-    return unansweredQuestions.map((question) => (
+    
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(unansweredQuestions, questionPageNumber, setQuestionPageNumber);
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -251,9 +277,14 @@ function renderSearchResults(
     setCurrentPage,
     setSelectedQuestion,
     searchResultsQuestionArrayRef,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
-    return searchResultsQuestionArrayRef.current.map((question) => (
+
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(searchResultsQuestionArrayRef.current, questionPageNumber, setQuestionPageNumber);
+    
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -297,6 +328,7 @@ function QuestionsPage({
 
     const [sort, setSort] = useState("Newest");
     const [noq, setNoq] = useState(questionsArray.length);
+    const [questionPageNumber, setQuestionPageNumber] = useState(1);
 
     useEffect(() => {
         setNoq(questionsArray.length);
@@ -329,11 +361,13 @@ function QuestionsPage({
     const displayAllQuestions = () => {
         setSort("Newest");
         setNoq(questionsArray.length);
+        setQuestionPageNumber(1);
     };
 
     const displayActiveQuestions = () => {
         setSort("Active");
         setNoq(activeSort(questionsArray, answersArray).length);
+        setQuestionPageNumber(1);
     };
 
     const displayUnansweredQuestions = () => {
@@ -342,7 +376,21 @@ function QuestionsPage({
             questionsArray.filter((question) => question.answers.length === 0)
                 .length
         );
+        setQuestionPageNumber(1);
     };
+
+    const incrementQuestionPageNumber = () => {
+        setQuestionPageNumber(questionPageNumber + 1);
+    };
+
+    const decrementQuestionPageNumber = () => {
+        if(questionPageNumber !== 1){
+            setQuestionPageNumber(questionPageNumber - 1);
+        }
+    };
+    
+
+
 
     //Searching Functionality
     const keywordSearchArray = useRef([]);
@@ -358,6 +406,7 @@ function QuestionsPage({
                     tagSearchArray.current
                 );
             setSort("Search");
+            setQuestionPageNumber(1);
             setNoq(searchResultsQuestionArrayRef.current.length);
         } else {
             displayAllQuestions();
@@ -461,7 +510,9 @@ function QuestionsPage({
                         questionsArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
 
                 {sort === "Active" &&
@@ -470,14 +521,18 @@ function QuestionsPage({
                         answersArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
                 {sort === "Unanswered" &&
                     renderUnansweredQuestions(
                         questionsArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
                 {sort === "Search" &&
                     renderSearchResults(
@@ -485,9 +540,19 @@ function QuestionsPage({
                         setCurrentPage,
                         setSelectedQuestion,
                         searchResultsQuestionArrayRef,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
+
             </div>
+            <div id="questionPageSelector">
+                    <button id="nextQuestionPageSelector" onClick={decrementQuestionPageNumber}>&#8592;</button>
+                    <div id="questionPageNumber">Prev | {questionPageNumber} | Next</div>
+                    <button id="prevQuestionPageSelector" onClick={incrementQuestionPageNumber}>&#8594;</button>
+            </div>
+
+            
         </div>
     );
 }
