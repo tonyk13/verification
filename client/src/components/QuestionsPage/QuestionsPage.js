@@ -310,6 +310,7 @@ function QuestionsPage({
     databaseUpdateTrigger,
     tagClicked,
     setTagClicked,
+    isGuest
 }) {
     /*Convert questions and tags into an Array*/
     const [questionsArray, setQuestionsArray] = useState([]);
@@ -319,6 +320,8 @@ function QuestionsPage({
         }
     }, [questions, databaseUpdateTrigger]);
 
+
+    console.log(isGuest)
     const [tagsArray, setTagsArray] = useState([]);
     useEffect(() => {
         if (tags !== null) {
@@ -483,13 +486,18 @@ function QuestionsPage({
                         {sort === "Unanswered" && "Unanswered Questions"}
                         {sort === "Search" && "Search Results"}
                     </div>
-                    <button
-                        type="button"
-                        className="askQuestionButton"
-                        onClick={loadAskQuestionPage}
-                    >
-                        Ask Question
-                    </button>
+                    
+                    {isGuest ?
+                       <div class="askedByName">*Must Be Logged In to Ask a Question</div>
+                       :
+                        <button
+                            type="button"
+                            className="askQuestionButton"
+                            onClick={loadAskQuestionPage}
+                        >
+                            Ask Question
+                        </button>
+                    }
                 </div>
 
                 <div id="qphRow2">

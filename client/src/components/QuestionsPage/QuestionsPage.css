@@ -46,6 +46,10 @@
     margin:0;
 }
 
+#mustBeLoggedInText{
+    color:red;  
+}
+
 #questionsWrapper .questionBox{
     font-size: 20px;
     font-family: sans-serif;
@@ -66,11 +70,11 @@
     font-weight:bold;
     top:22.5vh;
     position:fixed;
-    height: calc(100vh - 28vh); /* Calculate the height of the container relative to the viewport */
+    height: calc(100vh - 26vh); /* Calculate the height of the container relative to the viewport */
     overflow-y: auto;
     overflow-x: hidden;
     width: 80%;
-}
+}   
 
 .questionBox .questionTitle, .questionBox .questionTags{
     display: flex;
@@ -142,7 +146,7 @@
     align-items: center;
     justify-content: center;
     position:fixed;
-    top: 95vh;
+    top: 97vh;
     left:50%;
 }
 
@@ -162,3 +166,5 @@
 #nextQuestionPageSelector:hover,#prevQuestionPageSelector:hover {
     text-decoration: underline; 
 }
+
+
