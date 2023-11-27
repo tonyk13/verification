@@ -320,8 +320,6 @@ function QuestionsPage({
         }
     }, [questions, databaseUpdateTrigger]);
 
-
-    console.log(isGuest)
     const [tagsArray, setTagsArray] = useState([]);
     useEffect(() => {
         if (tags !== null) {
@@ -416,15 +414,39 @@ function QuestionsPage({
         }
     }, [currentSearch]);
 
+    //Search Auxiliary Functions
+    function splitTextAndLowercase(text) {
+        text = text.replace(/(\S)(\[|\])/g, '$1 $2').replace(/(\[|\])(\S)/g, '$1 $2');
+        const regex = /(\[[^\]]+\])|\S+/g;
+        const matches = text.match(regex) || [];
+        let regexMatches = [];
+        for (let i = 0; i < matches.length; i++) {
+            if (matches[i].startsWith('[') && matches[i].endsWith(']')) {
+                const wordsInBrackets = matches[i].slice(1, -1).trim().split(/\s+/);
+                const processedBracketedWords = wordsInBrackets.map(word => `[${word.toLowerCase()}]`);
+                regexMatches = regexMatches.concat(processedBracketedWords);
+            } else {
+            regexMatches.push(matches[i].toLowerCase());
+            }
+        }
+        return regexMatches;
+    }
+
+    function findSearchWordInText(searchWord, text) {
+        const wordsArray = text.split(/\s+/);
+        const wordExists = wordsArray.includes(searchWord);
+        return wordExists;
+    }
+
     function parseSearch(searchString) {
         // Update the searchString variable
         searchString = searchString.toLowerCase();
         let keywordSearchArrayTemp = [];
         let tagSearchArrayTemp = [];
 
-        searchString = searchString.replace(/(\[[^\]]+\])/g, " $1 ");
-
-        searchString.split(/\s+/).forEach((word) => {
+        let searchStringArray = splitTextAndLowercase(searchString)
+        
+        searchStringArray.forEach((word) => {
             if (word.startsWith("[") && word.endsWith("]")) {
                 tagSearchArrayTemp.push(word.substring(1, word.length - 1));
             } else {
@@ -441,8 +463,8 @@ function QuestionsPage({
         for (const searchWord of keywordSearchArray) {
             for (const question of questionsArray) {
                 if (
-                    question.title.toLowerCase().match(searchWord) ||
-                    question.text.toLowerCase().match(searchWord)
+                    findSearchWordInText(searchWord,question.title.toLowerCase()) ||
+                    findSearchWordInText(searchWord,question.text.toLowerCase())
                 ) {
                     searchResultsQuestionArray.push(question);
                 }
@@ -458,7 +480,7 @@ function QuestionsPage({
                     ).name;
                     if (tagsNamePointer === tagWord) {
                         searchResultsQuestionArray.push(question);
-                    }
+                    }   
                 }
             }
         }
@@ -488,7 +510,7 @@ function QuestionsPage({
                     </div>
                     
                     {isGuest ?
-                       <div class="askedByName">*Must Be Logged In to Ask a Question</div>
+                       <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question</div>
                        :
                         <button
                             type="button"
