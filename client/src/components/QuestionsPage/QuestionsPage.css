@@ -3,8 +3,9 @@
     position:absolute;
     max-height: 100%;
     width:80%;
-    left:20.5%;
+    left:20%;
     overflow: auto;
+    top: 11vh;
 }
 
  #questionsPageHeader {
@@ -18,10 +19,17 @@
     border-left:0;
     display: flex;
     flex-direction: column;
+    position:fixed;
+    width: 80%;
 }
     
  #qphRow1{
     font-weight:bold;
+
+    .askQuestionButton{
+        position:relative;
+        left: -1vh;
+    }
  }
 
  #qphRow1,#qphRow2 {
@@ -36,6 +44,10 @@
     background-color: gray;
     padding:0px;
     margin:0;
+}
+
+#mustBeLoggedInText{
+    color:red;  
 }
 
 #questionsWrapper .questionBox{
@@ -56,7 +68,13 @@
 #questionsWrapper{
     font-size:40px;
     font-weight:bold;
-}
+    top:22.5vh;
+    position:fixed;
+    height: calc(100vh - 26vh); /* Calculate the height of the container relative to the viewport */
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 80%;
+}   
 
 .questionBox .questionTitle, .questionBox .questionTags{
     display: flex;
@@ -121,3 +139,32 @@
         margin-right:0;
     } 
 }
+
+/*Page Selector CSS*/
+#questionPageSelector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position:fixed;
+    top: 97vh;
+    left:50%;
+}
+
+#nextQuestionPageSelector, #prevQuestionPageSelector {
+    background: transparent;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    color: dodgerblue;
+    font-size: 15px;
+}
+#questionPageNumber{
+    font-weight: normal;
+    font-size: 15px;
+}
+
+#nextQuestionPageSelector:hover,#prevQuestionPageSelector:hover {
+    text-decoration: underline; 
+}
+
+

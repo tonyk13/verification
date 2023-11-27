@@ -1,6 +1,7 @@
 .sidebar {
     background-color: white;
     height: 100%;
+    top: 11vh;
     width:19.5%;
     text-align:center;
     border-style: dotted;
@@ -8,9 +9,10 @@
     border-color:black;
     border-top:0;
     display: block;
-    position: absolute;
-    margin:0;
+    position: fixed;
+    margin:0 auto; 
     padding:0;
+    left: 0;
 }
 
 .sidebarButtons {

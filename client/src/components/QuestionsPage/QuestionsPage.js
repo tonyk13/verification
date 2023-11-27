@@ -135,16 +135,35 @@ function formatDate(dateString) {
     }
 }
 
+//getQuestionsBasedOnPageNumber
+function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber) {
+    const questionPageSize = 5;
+    let startIndex = (questionPageNumber - 1) * questionPageSize;
+    let endIndex = startIndex + questionPageSize;
+    if (startIndex > questions.length){
+        startIndex = 0;
+        endIndex = 4;
+        setQuestionPageNumber(1)
+    }
+    if (endIndex > questions.length) {
+        endIndex = questions.length;
+    }
+    let questionsBasedOnPageNumber = [...questions].slice(startIndex, endIndex);
+    return questionsBasedOnPageNumber;
+}
 //All Questions
 function renderAllQuestions(
     questions,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray, 
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
-
-    return questions.map((question) => (
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber);
+   
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -161,7 +180,7 @@ function renderAllQuestions(
     ));
 }
 
-//
+//getQuestionFromAnswer
 function getQuestionfromAnswer(questionsArray, answerID) {
     for (const q of questionsArray) {
         for (const a of q.answers) {
@@ -195,10 +214,13 @@ function renderActiveQuestions(
     answers,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     let activeQuestions = activeSort(questions, answers);
-    return activeQuestions.map((question) => (
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(activeQuestions, questionPageNumber, setQuestionPageNumber);
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -219,7 +241,9 @@ function renderUnansweredQuestions(
     questions,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
@@ -230,7 +254,9 @@ function renderUnansweredQuestions(
     if (unansweredQuestions.length === 0) {
         return "No Questions Found";
     }
-    return unansweredQuestions.map((question) => (
+    
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(unansweredQuestions, questionPageNumber, setQuestionPageNumber);
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -251,9 +277,14 @@ function renderSearchResults(
     setCurrentPage,
     setSelectedQuestion,
     searchResultsQuestionArrayRef,
-    tagsArray
+    tagsArray,
+    questionPageNumber, 
+    setQuestionPageNumber
 ) {
-    return searchResultsQuestionArrayRef.current.map((question) => (
+
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(searchResultsQuestionArrayRef.current, questionPageNumber, setQuestionPageNumber);
+    
+    return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
@@ -279,6 +310,7 @@ function QuestionsPage({
     databaseUpdateTrigger,
     tagClicked,
     setTagClicked,
+    isGuest
 }) {
     /*Convert questions and tags into an Array*/
     const [questionsArray, setQuestionsArray] = useState([]);
@@ -297,6 +329,7 @@ function QuestionsPage({
 
     const [sort, setSort] = useState("Newest");
     const [noq, setNoq] = useState(questionsArray.length);
+    const [questionPageNumber, setQuestionPageNumber] = useState(1);
 
     useEffect(() => {
         setNoq(questionsArray.length);
@@ -329,11 +362,13 @@ function QuestionsPage({
     const displayAllQuestions = () => {
         setSort("Newest");
         setNoq(questionsArray.length);
+        setQuestionPageNumber(1);
     };
 
     const displayActiveQuestions = () => {
         setSort("Active");
         setNoq(activeSort(questionsArray, answersArray).length);
+        setQuestionPageNumber(1);
     };
 
     const displayUnansweredQuestions = () => {
@@ -342,7 +377,21 @@ function QuestionsPage({
             questionsArray.filter((question) => question.answers.length === 0)
                 .length
         );
+        setQuestionPageNumber(1);
     };
+
+    const incrementQuestionPageNumber = () => {
+        setQuestionPageNumber(questionPageNumber + 1);
+    };
+
+    const decrementQuestionPageNumber = () => {
+        if(questionPageNumber !== 1){
+            setQuestionPageNumber(questionPageNumber - 1);
+        }
+    };
+    
+
+
 
     //Searching Functionality
     const keywordSearchArray = useRef([]);
@@ -358,11 +407,36 @@ function QuestionsPage({
                     tagSearchArray.current
                 );
             setSort("Search");
+            setQuestionPageNumber(1);
             setNoq(searchResultsQuestionArrayRef.current.length);
         } else {
             displayAllQuestions();
         }
     }, [currentSearch]);
+
+    //Search Auxiliary Functions
+    function splitTextAndLowercase(text) {
+        text = text.replace(/(\S)(\[|\])/g, '$1 $2').replace(/(\[|\])(\S)/g, '$1 $2');
+        const regex = /(\[[^\]]+\])|\S+/g;
+        const matches = text.match(regex) || [];
+        let regexMatches = [];
+        for (let i = 0; i < matches.length; i++) {
+            if (matches[i].startsWith('[') && matches[i].endsWith(']')) {
+                const wordsInBrackets = matches[i].slice(1, -1).trim().split(/\s+/);
+                const processedBracketedWords = wordsInBrackets.map(word => `[${word.toLowerCase()}]`);
+                regexMatches = regexMatches.concat(processedBracketedWords);
+            } else {
+            regexMatches.push(matches[i].toLowerCase());
+            }
+        }
+        return regexMatches;
+    }
+
+    function findSearchWordInText(searchWord, text) {
+        const wordsArray = text.split(/\s+/);
+        const wordExists = wordsArray.includes(searchWord);
+        return wordExists;
+    }
 
     function parseSearch(searchString) {
         // Update the searchString variable
@@ -370,9 +444,9 @@ function QuestionsPage({
         let keywordSearchArrayTemp = [];
         let tagSearchArrayTemp = [];
 
-        searchString = searchString.replace(/(\[[^\]]+\])/g, " $1 ");
-
-        searchString.split(/\s+/).forEach((word) => {
+        let searchStringArray = splitTextAndLowercase(searchString)
+        
+        searchStringArray.forEach((word) => {
             if (word.startsWith("[") && word.endsWith("]")) {
                 tagSearchArrayTemp.push(word.substring(1, word.length - 1));
             } else {
@@ -389,8 +463,8 @@ function QuestionsPage({
         for (const searchWord of keywordSearchArray) {
             for (const question of questionsArray) {
                 if (
-                    question.title.toLowerCase().match(searchWord) ||
-                    question.text.toLowerCase().match(searchWord)
+                    findSearchWordInText(searchWord,question.title.toLowerCase()) ||
+                    findSearchWordInText(searchWord,question.text.toLowerCase())
                 ) {
                     searchResultsQuestionArray.push(question);
                 }
@@ -406,7 +480,7 @@ function QuestionsPage({
                     ).name;
                     if (tagsNamePointer === tagWord) {
                         searchResultsQuestionArray.push(question);
-                    }
+                    }   
                 }
             }
         }
@@ -434,13 +508,18 @@ function QuestionsPage({
                         {sort === "Unanswered" && "Unanswered Questions"}
                         {sort === "Search" && "Search Results"}
                     </div>
-                    <button
-                        type="button"
-                        className="askQuestionButton"
-                        onClick={loadAskQuestionPage}
-                    >
-                        Ask Question
-                    </button>
+                    
+                    {isGuest ?
+                       <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question</div>
+                       :
+                        <button
+                            type="button"
+                            className="askQuestionButton"
+                            onClick={loadAskQuestionPage}
+                        >
+                            Ask Question
+                        </button>
+                    }
                 </div>
 
                 <div id="qphRow2">
@@ -461,7 +540,9 @@ function QuestionsPage({
                         questionsArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
 
                 {sort === "Active" &&
@@ -470,14 +551,18 @@ function QuestionsPage({
                         answersArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
                 {sort === "Unanswered" &&
                     renderUnansweredQuestions(
                         questionsArray,
                         setCurrentPage,
                         setSelectedQuestion,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
                 {sort === "Search" &&
                     renderSearchResults(
@@ -485,9 +570,19 @@ function QuestionsPage({
                         setCurrentPage,
                         setSelectedQuestion,
                         searchResultsQuestionArrayRef,
-                        tagsArray
+                        tagsArray,
+                        questionPageNumber,
+                        setQuestionPageNumber
                     )}
+
             </div>
+            <div id="questionPageSelector">
+                    <button id="nextQuestionPageSelector" onClick={decrementQuestionPageNumber}>&#8592;</button>
+                    <div id="questionPageNumber">Prev | {questionPageNumber} | Next</div>
+                    <button id="prevQuestionPageSelector" onClick={incrementQuestionPageNumber}>&#8594;</button>
+            </div>
+
+            
         </div>
     );
 }

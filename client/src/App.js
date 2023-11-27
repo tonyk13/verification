@@ -98,6 +98,7 @@ function App() {
                     databaseUpdateTrigger={databaseUpdateTrigger}
                     tagClicked={tagClicked}
                     setTagClicked={setTagClicked}
+                    isGuest={isGuest}
                 />
             );
         } else if (currentPage === "tagsPage") {
