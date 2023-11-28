@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./AskQuestionPage.css";
+import Cookie from "js-cookie";
 
-export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigger, tags }) {
-
+export default function AskQuestionPage({ 
+    setCurrentPage, 
+    setDataBaseUpdateTrigger, 
+    tags
+}) {
     //PQ Title Handler
     const [pqNE1, setpqNE1] = useState(true);
     const [pqTitleText, setpqTitleText] = useState('');
@@ -159,16 +163,18 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
     
         if (!pqNE1 && !pqNE2 && !pqHLE1 && !pqNE3 && !pqTE1 && !pqNE4) {
             let pqTagArray = await checkQuestionTags(pqTagStringArray);
+            const pqUsername = Cookie.get("auth");
     
             // Post Question
             let postQuestion = {
-            title: document.getElementById("pqTitle").value,
-            text: document.getElementById("pqText").value,
-            tags: pqTagArray,
-            answers: new Array(0),
-            asked_by: document.getElementById("pqUsername").value,
-            ask_date_time: new Date(),
-            views: 0,
+                title: document.getElementById("pqTitle").value,
+                summary: document.getElementById("pqSummary").value,
+                text: document.getElementById("pqText").value,
+                tags: pqTagArray,
+                answers: new Array(0),
+                asked_by: pqUsername,
+                ask_date_time: new Date(),
+                views: 0,
             };
     
             // Fetch
