@@ -3,7 +3,34 @@ const bcrypt = require("bcryptjs");
 
 module.exports.CreateAccount = async (req, res, next) => {
     try {
-        const { email, username, passwordHash, createdAt, reputation, questions, answers, comments } = req.body;
+        const {
+            email,
+            username,
+            passwordHash,
+            passwordHashVerification,
+            createdAt,
+            reputation,
+            questions,
+            answers,
+            comments,
+        } = req.body;
+
+        if (!email) {
+            return res.json({ message: "Email is required", success: false });
+        }
+        if (!username) {
+            return res.json({ message: "Username is required", success: false });
+        }
+        if (!passwordHash) {
+            return res.json({ message: "Password is required", success: false });
+        }
+        if (passwordHash.includes(username) || passwordHash.includes(email)) {
+            return res.json({ message: "Password cannot contain username or email", success: false });
+        }
+        if (passwordHashVerification !== passwordHash) {
+            return res.json({ message: "Passwords do not match", success: false });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.json({ message: "User account with this email already exists" });
@@ -57,7 +84,7 @@ module.exports.Login = async (req, res, next) => {
         });
 
         res.status(201).json({
-            message: "User logged in successfully",
+            message: user.username,
             success: true,
         });
 

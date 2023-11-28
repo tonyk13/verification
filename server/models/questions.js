@@ -10,8 +10,10 @@ var questionsSchema = new Schema({
     tags: [{ type: Schema.Types.ObjectId, ref: "tagModel" }],
     answers: [{ type: Schema.Types.ObjectId, ref: "answerModel" }],
     asked_by: { type: String, required: true },
-    ask_date_time: { type: Date, default: Date.now},
+    ask_date_time: { type: Date, default: Date.now },
     views: { type: Number, default: 0 },
+    comments: [{ type: Schema.Types.ObjectId, ref: "commentModel" }],
+    votes: { type: Number, default: 0 },
 });
 
 questionsSchema.virtual("url").get(function () {

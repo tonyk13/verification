@@ -27,9 +27,7 @@ function QuestionBox({
                 <p
                     class="questionTitle"
                     onClick={() => {
-                        const selectedQuestion = questionsArray.find(
-                            (question) => question.title === questionTitle
-                        );
+                        const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
                         setSelectedQuestion(selectedQuestion);
                         selectedQuestion.views += 1;
                         setCurrentPage("answersPage");
@@ -119,15 +117,10 @@ function formatDate(dateString) {
         return `${timeDifferenceInSeconds} seconds ago`;
     } else if (time.getFullYear() < currentYear) {
         return `${monthString} ${time.getDate()}, ${time.getFullYear()} at ${hourString}:${minuteString}`;
-    } else if (
-        time.getDate() > currentTime.getDate() &&
-        time.getMonth() !== currentTime.getMonth()
-    ) {
+    } else if (time.getDate() > currentTime.getDate() && time.getMonth() !== currentTime.getMonth()) {
         return `${monthString} ${time.getDate()}, at ${hourString}:${minuteString}`;
     } else if (currentTime.getHours() - time.getHours() !== 0) {
-        return `${Math.abs(
-            currentTime.getHours() - time.getHours()
-        )} hours ago`;
+        return `${Math.abs(currentTime.getHours() - time.getHours())} hours ago`;
     } else if (currentTime.getMinutes() - time.getMinutes() !== 0) {
         return `${currentTime.getMinutes() - time.getMinutes()} minutes ago`;
     } else {
@@ -140,10 +133,10 @@ function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestio
     const questionPageSize = 5;
     let startIndex = (questionPageNumber - 1) * questionPageSize;
     let endIndex = startIndex + questionPageSize;
-    if (startIndex > questions.length){
+    if (startIndex > questions.length) {
         startIndex = 0;
         endIndex = 4;
-        setQuestionPageNumber(1)
+        setQuestionPageNumber(1);
     }
     if (endIndex > questions.length) {
         endIndex = questions.length;
@@ -156,13 +149,17 @@ function renderAllQuestions(
     questions,
     setCurrentPage,
     setSelectedQuestion,
-    tagsArray, 
-    questionPageNumber, 
+    tagsArray,
+    questionPageNumber,
     setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
-    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber);
-   
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
+        questions,
+        questionPageNumber,
+        setQuestionPageNumber
+    );
+
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
@@ -195,9 +192,7 @@ function getQuestionfromAnswer(questionsArray, answerID) {
 function activeSort(questionsArray, answersArray) {
     let returnArray = [];
 
-    const activeSortTempArray = answersArray.sort(
-        (a, b) => new Date(a.ans_date_time) - new Date(b.ans_date_time)
-    );
+    const activeSortTempArray = answersArray.sort((a, b) => new Date(a.ans_date_time) - new Date(b.ans_date_time));
 
     for (const answer of activeSortTempArray) {
         const question = getQuestionfromAnswer(questionsArray, answer._id);
@@ -215,11 +210,15 @@ function renderActiveQuestions(
     setCurrentPage,
     setSelectedQuestion,
     tagsArray,
-    questionPageNumber, 
+    questionPageNumber,
     setQuestionPageNumber
 ) {
     let activeQuestions = activeSort(questions, answers);
-    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(activeQuestions, questionPageNumber, setQuestionPageNumber);
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
+        activeQuestions,
+        questionPageNumber,
+        setQuestionPageNumber
+    );
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
@@ -242,20 +241,22 @@ function renderUnansweredQuestions(
     setCurrentPage,
     setSelectedQuestion,
     tagsArray,
-    questionPageNumber, 
+    questionPageNumber,
     setQuestionPageNumber
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
-    let unansweredQuestions = questions.filter(
-        (question) => question.answers.length === 0
-    );
+    let unansweredQuestions = questions.filter((question) => question.answers.length === 0);
 
     if (unansweredQuestions.length === 0) {
         return "No Questions Found";
     }
-    
-    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(unansweredQuestions, questionPageNumber, setQuestionPageNumber);
+
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
+        unansweredQuestions,
+        questionPageNumber,
+        setQuestionPageNumber
+    );
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
@@ -278,12 +279,15 @@ function renderSearchResults(
     setSelectedQuestion,
     searchResultsQuestionArrayRef,
     tagsArray,
-    questionPageNumber, 
+    questionPageNumber,
     setQuestionPageNumber
 ) {
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
+        searchResultsQuestionArrayRef.current,
+        questionPageNumber,
+        setQuestionPageNumber
+    );
 
-    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(searchResultsQuestionArrayRef.current, questionPageNumber, setQuestionPageNumber);
-    
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
             key={question.id}
@@ -310,7 +314,7 @@ function QuestionsPage({
     databaseUpdateTrigger,
     tagClicked,
     setTagClicked,
-    isGuest
+    isGuest,
 }) {
     /*Convert questions and tags into an Array*/
     const [questionsArray, setQuestionsArray] = useState([]);
@@ -343,9 +347,7 @@ function QuestionsPage({
             try {
                 let allAnswers = [];
                 for (const question of questionsArray) {
-                    const response = await axios.get(
-                        `http://localhost:8000/api/questions/${question._id}/answers`
-                    );
+                    const response = await axios.get(`http://localhost:8000/api/questions/${question._id}/answers`);
                     const answers = response.data;
 
                     allAnswers = allAnswers.concat(answers);
@@ -373,10 +375,7 @@ function QuestionsPage({
 
     const displayUnansweredQuestions = () => {
         setSort("Unanswered");
-        setNoq(
-            questionsArray.filter((question) => question.answers.length === 0)
-                .length
-        );
+        setNoq(questionsArray.filter((question) => question.answers.length === 0).length);
         setQuestionPageNumber(1);
     };
 
@@ -385,13 +384,10 @@ function QuestionsPage({
     };
 
     const decrementQuestionPageNumber = () => {
-        if(questionPageNumber !== 1){
+        if (questionPageNumber !== 1) {
             setQuestionPageNumber(questionPageNumber - 1);
         }
     };
-    
-
-
 
     //Searching Functionality
     const keywordSearchArray = useRef([]);
@@ -399,13 +395,12 @@ function QuestionsPage({
     const searchResultsQuestionArrayRef = useRef([]);
 
     useEffect(() => {
-        if (currentSearch !== "" ) {
+        if (currentSearch !== "") {
             parseSearch(currentSearch);
-            searchResultsQuestionArrayRef.current =
-                keywordTagArraysToSearchArray(
-                    keywordSearchArray.current,
-                    tagSearchArray.current
-                );
+            searchResultsQuestionArrayRef.current = keywordTagArraysToSearchArray(
+                keywordSearchArray.current,
+                tagSearchArray.current
+            );
             setSort("Search");
             setQuestionPageNumber(1);
             setNoq(searchResultsQuestionArrayRef.current.length);
@@ -416,17 +411,17 @@ function QuestionsPage({
 
     //Search Auxiliary Functions
     function splitTextAndLowercase(text) {
-        text = text.replace(/(\S)(\[|\])/g, '$1 $2').replace(/(\[|\])(\S)/g, '$1 $2');
+        text = text.replace(/(\S)(\[|\])/g, "$1 $2").replace(/(\[|\])(\S)/g, "$1 $2");
         const regex = /(\[[^\]]+\])|\S+/g;
         const matches = text.match(regex) || [];
         let regexMatches = [];
         for (let i = 0; i < matches.length; i++) {
-            if (matches[i].startsWith('[') && matches[i].endsWith(']')) {
+            if (matches[i].startsWith("[") && matches[i].endsWith("]")) {
                 const wordsInBrackets = matches[i].slice(1, -1).trim().split(/\s+/);
-                const processedBracketedWords = wordsInBrackets.map(word => `[${word.toLowerCase()}]`);
+                const processedBracketedWords = wordsInBrackets.map((word) => `[${word.toLowerCase()}]`);
                 regexMatches = regexMatches.concat(processedBracketedWords);
             } else {
-            regexMatches.push(matches[i].toLowerCase());
+                regexMatches.push(matches[i].toLowerCase());
             }
         }
         return regexMatches;
@@ -444,8 +439,8 @@ function QuestionsPage({
         let keywordSearchArrayTemp = [];
         let tagSearchArrayTemp = [];
 
-        let searchStringArray = splitTextAndLowercase(searchString)
-        
+        let searchStringArray = splitTextAndLowercase(searchString);
+
         searchStringArray.forEach((word) => {
             if (word.startsWith("[") && word.endsWith("]")) {
                 tagSearchArrayTemp.push(word.substring(1, word.length - 1));
@@ -463,8 +458,8 @@ function QuestionsPage({
         for (const searchWord of keywordSearchArray) {
             for (const question of questionsArray) {
                 if (
-                    findSearchWordInText(searchWord,question.title.toLowerCase()) ||
-                    findSearchWordInText(searchWord,question.text.toLowerCase())
+                    findSearchWordInText(searchWord, question.title.toLowerCase()) ||
+                    findSearchWordInText(searchWord, question.text.toLowerCase())
                 ) {
                     searchResultsQuestionArray.push(question);
                 }
@@ -475,21 +470,17 @@ function QuestionsPage({
         for (const question of questionsArray) {
             for (const tagWord of tagSearchArray) {
                 for (const tagsPointer of question.tags) {
-                    const tagsNamePointer = tagsArray.find(
-                        (tag) => tag._id === tagsPointer
-                    ).name;
+                    const tagsNamePointer = tagsArray.find((tag) => tag._id === tagsPointer).name;
                     if (tagsNamePointer === tagWord) {
                         searchResultsQuestionArray.push(question);
-                    }   
+                    }
                 }
             }
         }
 
         //Removing Dupes
         let uniqueSearchResultsSet = new Set(searchResultsQuestionArray);
-        let uniqueSearchResultsQuestionArray = Array.from(
-            uniqueSearchResultsSet
-        );
+        let uniqueSearchResultsQuestionArray = Array.from(uniqueSearchResultsSet);
         return uniqueSearchResultsQuestionArray;
     }
 
@@ -508,18 +499,14 @@ function QuestionsPage({
                         {sort === "Unanswered" && "Unanswered Questions"}
                         {sort === "Search" && "Search Results"}
                     </div>
-                    
-                    {isGuest ?
-                       <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question</div>
-                       :
-                        <button
-                            type="button"
-                            className="askQuestionButton"
-                            onClick={loadAskQuestionPage}
-                        >
+
+                    {isGuest ? (
+                        <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question</div>
+                    ) : (
+                        <button type="button" className="askQuestionButton" onClick={loadAskQuestionPage}>
                             Ask Question
                         </button>
-                    }
+                    )}
                 </div>
 
                 <div id="qphRow2">
@@ -527,9 +514,7 @@ function QuestionsPage({
                     <div id="questionsStatusButtons">
                         <button onClick={displayAllQuestions}>Newest</button>
                         <button onClick={displayActiveQuestions}>Active</button>
-                        <button onClick={displayUnansweredQuestions}>
-                            Unanswered
-                        </button>
+                        <button onClick={displayUnansweredQuestions}>Unanswered</button>
                     </div>
                 </div>
             </div>
@@ -574,15 +559,16 @@ function QuestionsPage({
                         questionPageNumber,
                         setQuestionPageNumber
                     )}
-
             </div>
             <div id="questionPageSelector">
-                    <button id="nextQuestionPageSelector" onClick={decrementQuestionPageNumber}>&#8592;</button>
-                    <div id="questionPageNumber">Prev | {questionPageNumber} | Next</div>
-                    <button id="prevQuestionPageSelector" onClick={incrementQuestionPageNumber}>&#8594;</button>
+                <button id="nextQuestionPageSelector" onClick={decrementQuestionPageNumber}>
+                    &#8592;
+                </button>
+                <div id="questionPageNumber">Prev | {questionPageNumber} | Next</div>
+                <button id="prevQuestionPageSelector" onClick={incrementQuestionPageNumber}>
+                    &#8594;
+                </button>
             </div>
-
-            
         </div>
     );
 }

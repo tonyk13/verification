@@ -8,4 +8,13 @@ router.post("/questions/:_id/answers", answersController.answer_create_post);
 // GET request for a question's list of answers.
 router.get("/questions/:_id/answers", answersController.answer_list);
 
+// POST request for adding a comment to an answer.
+router.post("/questions/:questionId/answers/:answerId/comments", answersController.answer_add_comment);
+
+// GET request for a specific answer.
+router.get("/questions/:questionId/answers/:answerId", answersController.get_answer);
+
+// GET request for an answer's commments.
+router.get("/questions/:questionId/answers/:answerId/comments", answersController.get_answer_comments);
+
 module.exports = router;
