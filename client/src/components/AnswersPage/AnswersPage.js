@@ -1,22 +1,70 @@
 import { React, useState, useEffect } from "react";
 import axios from "axios";
 import AnswerQuestionButton from "../Buttons/AnswerQuestionButton";
+import UpvoteButton from "../VotingButtons/UpvoteButton";
+import DownvoteButton from "../VotingButtons/DownvoteButton";
 import "./AnswersPage.css";
+import Cookie from "js-cookie";
 
-function AnswersPage({
-    selectedQuestion,
-    setCurrentPage,
-    setDataBaseUpdateTrigger,
-}) {
+/* 
+Structure:
+
+    AnswersPage
+        AnswersContainer
+            AnswersPageHeader
+            QuestionWrapper
+
+            QuestionCommentsWrapper,
+            AnswerCommentsWrapper,
+            
+            Comment
+
+            AnswersWrapper
+            Answer
+*/
+
+function AnswersPage({ selectedQuestion, setCurrentPage, setDataBaseUpdateTrigger, tags, isGuest }) {
     const [answers, setAnswers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [questionVotes, setQuestionVotes] = useState(selectedQuestion.votes);
+    const [registeredUser, setRegisteredUser] = useState(false);
 
+    const tidToTagName = (tid) => {
+        const tag = tags.find((tag) => tag._id === tid);
+        return tag ? tag.name : "";
+    };
+
+    // Get a question's number of votes
     useEffect(() => {
         if (selectedQuestion) {
             axios
-                .get(
-                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers`
-                )
+                .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/votes`)
+                .then((response) => {
+                    setQuestionVotes(response.data.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    });
+
+    // Check if a registered user is logged in (not a guest)
+    useEffect(() => {
+        const user = Cookie.get("auth");
+        if (user) {
+            if (user !== "GUEST") {
+                setRegisteredUser(true);
+            } else {
+                setRegisteredUser(false);
+            }
+        }
+    });
+
+    // Get a question's answers
+    useEffect(() => {
+        if (selectedQuestion) {
+            axios
+                .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers`)
                 .then((response) => {
                     setAnswers(Object.values(response.data));
                     setLoading(false);
@@ -38,33 +86,56 @@ function AnswersPage({
                 selectedQuestion={selectedQuestion}
                 answers={answers}
                 setCurrentPage={setCurrentPage}
+                questionVotes={questionVotes}
+                setQuestionVotes={setQuestionVotes}
+                registeredUser={registeredUser}
+                tidToTagName={tidToTagName}
+                isGuest={isGuest}
             />
         </div>
     );
 }
 
-function AnswersContainer({ selectedQuestion, answers, setCurrentPage }) {
+function AnswersContainer({
+    selectedQuestion,
+    answers,
+    setCurrentPage,
+    questionVotes,
+    setQuestionVotes,
+    registeredUser,
+    tidToTagName,
+    isGuest,
+}) {
     return (
         <div className="answersContainer">
             <AnswersPageHeader
                 selectedQuestion={selectedQuestion}
                 setCurrentPage={setCurrentPage}
                 numAnswers={answers.length}
+                isGuest={isGuest}
             />
-            <QuestionWrapper selectedQuestion={selectedQuestion} />
+            <QuestionWrapper
+                selectedQuestion={selectedQuestion}
+                questionVotes={questionVotes}
+                setQuestionVotes={setQuestionVotes}
+                registeredUser={registeredUser}
+                tidToTagName={tidToTagName}
+                isGuest={isGuest}
+            />
             <AnswersWrapper
                 selectedQuestion={selectedQuestion}
                 answers={answers}
+                registeredUser={registeredUser}
+                isGuest={isGuest}
             />
-            <AnswerQuestionButton
-                selectedQuestion={selectedQuestion}
-                setCurrentPage={setCurrentPage}
-            />
+            {registeredUser && (
+                <AnswerQuestionButton selectedQuestion={selectedQuestion} setCurrentPage={setCurrentPage} />
+            )}
         </div>
     );
 }
 
-function AnswersPageHeader({ selectedQuestion, setCurrentPage, numAnswers }) {
+function AnswersPageHeader({ selectedQuestion, setCurrentPage, numAnswers, isGuest }) {
     const loadAskQuestionPage = () => {
         setCurrentPage("askQuestionPage");
     };
@@ -72,15 +143,16 @@ function AnswersPageHeader({ selectedQuestion, setCurrentPage, numAnswers }) {
     return (
         <div className="answersPageHeader">
             <div className="headerContent">
-                <div id="numberOfAnswers">{numAnswers} answers</div>
+                <div id="numAnswersAndViewsBox">
+                    <div id="numberOfAnswers">{numAnswers} answers</div>
+                    <div className="questionNumViews">{selectedQuestion.views} views</div>
+                </div>
                 <div id="questionTitle">{selectedQuestion.title}</div>
-                <button
-                    type="button"
-                    className="askQuestionButton"
-                    onClick={loadAskQuestionPage}
-                >
-                    Ask Question
-                </button>
+                {!isGuest && (
+                    <button type="button" className="askQuestionButton" onClick={loadAskQuestionPage}>
+                        Ask Question
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -154,15 +226,10 @@ function formatDate(dateString) {
         return `${timeDifferenceInSeconds} seconds ago`;
     } else if (time.getFullYear() < currentYear) {
         return `${monthString} ${time.getDate()}, ${time.getFullYear()} at ${hourString}:${minuteString}`;
-    } else if (
-        time.getDate() > currentTime.getDate() &&
-        time.getMonth() !== currentTime.getMonth()
-    ) {
+    } else if (time.getDate() > currentTime.getDate() && time.getMonth() !== currentTime.getMonth()) {
         return `${monthString} ${time.getDate()}, at ${hourString}:${minuteString}`;
     } else if (currentTime.getHours() - time.getHours() !== 0) {
-        return `${Math.abs(
-            currentTime.getHours() - time.getHours()
-        )} hours ago`;
+        return `${Math.abs(currentTime.getHours() - time.getHours())} hours ago`;
     } else if (currentTime.getMinutes() - time.getMinutes() !== 0) {
         return `${currentTime.getMinutes() - time.getMinutes()} minutes ago`;
     } else {
@@ -170,82 +237,434 @@ function formatDate(dateString) {
     }
 }
 
-function QuestionWrapper({ selectedQuestion }) {
+function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, registeredUser, tidToTagName, isGuest }) {
     function renderQuestionTextWithLinks(text) {
         const hyperlinkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
 
-        const textWithLinks = text.replace(
-            hyperlinkRegex,
-            (match, linkText, linkTarget) => {
-                return `<a href="${linkTarget}" target="_blank">${linkText}</a>`;
-            }
-        );
+        const textWithLinks = text.replace(hyperlinkRegex, (match, linkText, linkTarget) => {
+            return `<a href="${linkTarget}" target="_blank">${linkText}</a>`;
+        });
 
         return { __html: textWithLinks };
     }
 
+    function handleQuestionUpvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/upvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function handleQuestionDownvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/downvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    const [newComment, setNewComment] = useState("");
+    const [newCommentCounter, setNewCommentCounter] = useState(0);
+
+    const questionAddComment = (e) => {
+        if (e.key === "Enter") {
+            axios
+                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`, {
+                    text: newComment,
+                    author: Cookie.get("auth"),
+                })
+                .then((response) => {
+                    console.log(response.data);
+                    setNewCommentCounter(newCommentCounter + 1);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+
+            setNewComment("");
+        }
+    };
+
+    useEffect(() => {
+        const getQuestion = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/questions/${selectedQuestion._id}`);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        getQuestion();
+    });
+
     return (
         <div id="questionWrapper">
             <div className="questionBox">
-                <div className="questionNumViews">
-                    {selectedQuestion.views} Views
+                <div className="questionBoxLine1">
+                    <div className="votesBox">
+                        {registeredUser && <UpvoteButton handleUpvote={handleQuestionUpvote}></UpvoteButton>}
+                        <div className="questionVotes">{questionVotes} votes</div>
+                        {registeredUser && <DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
+                    </div>
+                    <div
+                        className="questionText"
+                        dangerouslySetInnerHTML={renderQuestionTextWithLinks(selectedQuestion.text)}
+                    />
+                    <div className="askedByName">{selectedQuestion.asked_by}</div>
+                    <div className="askedByTime">asked {formatDate(selectedQuestion.ask_date_time)}</div>
                 </div>
-                <div
-                    className="questionText"
-                    dangerouslySetInnerHTML={renderQuestionTextWithLinks(
-                        selectedQuestion.text
+
+                <div className="questionBoxLine2">
+                    <div class="answersPageQuestionTags">
+                        {selectedQuestion.tags.map((tid) => (
+                            <p class="answersPageqTag">{tidToTagName(tid)}</p>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="questionBoxLine3">
+                    {selectedQuestion.comments && (
+                        <QuestionCommentsWrapper
+                            selectedQuestion={selectedQuestion}
+                            newCommentCounter={newCommentCounter}
+                        />
                     )}
-                />
-                <div className="askedByName">{selectedQuestion.asked_by}</div>
-                <div className="askedByTime">
-                    asked {formatDate(selectedQuestion.ask_date_time)}
+                    {!isGuest && (
+                        <input
+                            id="addNewQuestionComment"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => questionAddComment(e)}
+                        ></input>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
 
-function AnswersWrapper({ answers }) {
-    answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
+function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter }) {
+    const [comments, setComments] = useState([]);
+
+    const [displayedComments, setDisplayedComments] = useState([]);
+    const [startIndex, setStartIndex] = useState(0);
+
+    // Get a question's comments
+    useEffect(() => {
+        try {
+            axios
+                .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`)
+                .then((response) => {
+                    setComments(Object.values(response.data));
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } catch (error) {
+            console.error(error);
+        }
+    }, [newCommentCounter]);
+
+    useEffect(() => {
+        const endIndex = startIndex + 3;
+        const slicedComments = comments.slice(startIndex, endIndex);
+        setDisplayedComments(slicedComments);
+    }, [startIndex, comments]);
+
+    const handleNext = () => {
+        if (startIndex + 3 >= comments.length) {
+            setStartIndex(0);
+        } else {
+            setStartIndex(startIndex + 3);
+        }
+    };
+
+    const handlePrev = () => {
+        if (startIndex - 3 >= 0) {
+            setStartIndex(startIndex - 3);
+        }
+    };
 
     return (
-        <div id="answersWrapper">
-            {answers.map((answer) => (
-                <Answer
-                    key={answer._id}
-                    answerText={answer.text}
-                    answeredByName={answer.ans_by}
-                    answeredByTime={answer.ans_date_time}
-                />
+        <div class="commentsWrapper">
+            {comments.length > 0 && (
+                <div>
+                    <button onClick={handlePrev} disabled={startIndex === 0}>
+                        Prev
+                    </button>
+                    <button onClick={handleNext}>Next</button>
+                </div>
+            )}
+            <div style={{}}>
+                {displayedComments.map((comment) => (
+                    <Comment key={comment._id} commentText={comment.text} commentAuthor={comment.author} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter }) {
+    const [comments, setComments] = useState([]);
+
+    const [displayedComments, setDisplayedComments] = useState([]);
+    const [startIndex, setStartIndex] = useState(0);
+
+    // Get an answer's comments
+    useEffect(() => {
+        try {
+            axios
+                .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments`)
+                .then((response) => {
+                    setComments(Object.values(response.data));
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } catch (error) {
+            console.error(error);
+        }
+    }, [newCommentCounter]);
+
+    useEffect(() => {
+        const endIndex = startIndex + 3;
+        const slicedComments = comments.slice(startIndex, endIndex);
+        setDisplayedComments(slicedComments);
+    }, [startIndex, comments]);
+
+    const handleNext = () => {
+        if (startIndex + 3 >= comments.length) {
+            setStartIndex(0);
+        } else {
+            setStartIndex(startIndex + 3);
+        }
+    };
+
+    const handlePrev = () => {
+        if (startIndex - 3 >= 0) {
+            setStartIndex(startIndex - 3);
+        }
+    };
+
+    return (
+        <div id="commentsWrapper">
+            {comments.length > 0 && (
+                <div>
+                    <button onClick={handlePrev} disabled={startIndex === 0}>
+                        Prev
+                    </button>
+                    <button onClick={handleNext}>Next</button>
+                </div>
+            )}
+            {displayedComments.map((comment) => (
+                <Comment key={comment._id} commentText={comment.text} commentAuthor={comment.author} />
             ))}
         </div>
     );
 }
 
-function Answer({ answerText, answeredByName, answeredByTime }) {
+function Comment({ commentText, commentAuthor }) {
+    return (
+        <div className="commentBox">
+            <div className="commentText">{commentText}</div>
+            <div className="commentAuthor">{commentAuthor}</div>
+        </div>
+    );
+}
+
+const AnswersWrapper = ({
+    selectedQuestion,
+    answers,
+    registeredUser,
+    handleAnswerUpvote,
+    handleAnswerDownvote,
+    isGuest,
+}) => {
+    const [startIndex, setStartIndex] = useState(0);
+    const itemsPerPage = 5;
+
+    const handlePrev = () => {
+        const newIndex = Math.max(0, startIndex - itemsPerPage);
+        setStartIndex(newIndex);
+    };
+
+    const handleNext = () => {
+        let newIndex = startIndex + itemsPerPage;
+        if (newIndex >= answers.length) {
+            newIndex = 0;
+        }
+        setStartIndex(newIndex);
+    };
+
+    function handleAnswerUpvote(answerId) {
+        axios
+            .put(`http://localhost:8000/api/answers/${answerId}/upvote`)
+            .then((response) => {
+                const updatedAnswer = response.data;
+                const answerIndex = answers.findIndex((answer) => answer._id === updatedAnswer._id);
+                answers[answerIndex] = updatedAnswer;
+                setStartIndex(startIndex);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function handleAnswerDownvote(answerId) {
+        axios
+            .put(`http://localhost:8000/api/answers/${answerId}/downvote`)
+            .then((response) => {
+                const updatedAnswer = response.data;
+                const answerIndex = answers.findIndex((answer) => answer._id === updatedAnswer._id);
+                answers[answerIndex] = updatedAnswer;
+                setStartIndex(startIndex);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
+
+    const visibleElements = answers.slice(startIndex, startIndex + itemsPerPage);
+
+    return (
+        <div style={{ width: "fitContent" }}>
+            {answers.length > 0 && (
+                <div>
+                    <button onClick={handlePrev} disabled={startIndex === 0}>
+                        Prev
+                    </button>
+                    <button onClick={handleNext}>Next</button>
+                </div>
+            )}
+            <div
+                style={{
+                    flex: "row",
+                    width: "fitContent",
+                    maxHeight: "280px",
+                    overflowY: "scroll",
+                    border: "1px solid #ccc",
+                }}
+            >
+                {visibleElements.map((answer) => (
+                    <Answer
+                        selectedQuestion={selectedQuestion}
+                        answerKey={answer._id}
+                        answerText={answer.text}
+                        answeredByName={answer.ans_by}
+                        answeredByTime={answer.ans_date_time}
+                        answerVotes={answer.votes}
+                        registeredUser={registeredUser}
+                        handleAnswerUpvote={handleAnswerUpvote}
+                        handleAnswerDownvote={handleAnswerDownvote}
+                        isGuest={isGuest}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
+function Answer({
+    selectedQuestion,
+    answerKey,
+    answerText,
+    answeredByName,
+    answeredByTime,
+    answerVotes,
+    registeredUser,
+    handleAnswerUpvote,
+    handleAnswerDownvote,
+    isGuest,
+}) {
     function renderAnswerWithLinks(text) {
         const hyperlinkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
 
-        const textWithLinks = text.replace(
-            hyperlinkRegex,
-            (match, linkText, linkTarget) => {
-                return `<a href="${linkTarget}" target="_blank">${linkText}</a>`;
-            }
-        );
+        const textWithLinks = text.replace(hyperlinkRegex, (match, linkText, linkTarget) => {
+            return `<a href="${linkTarget}" target="_blank">${linkText}</a>`;
+        });
 
         return { __html: textWithLinks };
     }
 
+    const [newComment, setNewComment] = useState("");
+    const [answer, setAnswer] = useState([]);
+    const [newCommentCounter, setNewCommentCounter] = useState(0);
+
+    const answerAddComment = (e) => {
+        if (e.key === "Enter") {
+            axios
+                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/comments`, {
+                    text: newComment,
+                    author: Cookie.get("auth"),
+                })
+                .then(() => {
+                    setNewCommentCounter(newCommentCounter + 1);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+
+            setNewComment("");
+        }
+    };
+
+    // Get the answer
+    useEffect(() => {
+        const getAnswer = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}`
+                );
+                setAnswer(response.data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        getAnswer();
+    }, [setNewComment]);
+
     return (
         <div className="answerBox">
-            <div
-                className="answerText"
-                dangerouslySetInnerHTML={renderAnswerWithLinks(answerText)}
-            />
-            <div className="answeredByName">{answeredByName}</div>
-            <div className="answeredByTime">{`answered ${formatDate(
-                answeredByTime
-            )}`}</div>
+            <div className="answerBoxLine1">
+                <div className="votesBox">
+                    {registeredUser && <UpvoteButton handleUpvote={handleAnswerUpvote}></UpvoteButton>}
+                    <div className="questionVotes">{answerVotes} votes</div>
+                    {registeredUser && <DownvoteButton handleDownvote={handleAnswerDownvote}></DownvoteButton>}
+                </div>
+                <div className="answerText" dangerouslySetInnerHTML={renderAnswerWithLinks(answerText)} />
+                <div className="answeredByName">{answeredByName}</div>
+                <div className="answeredByTime">{`answered ${formatDate(answeredByTime)}`}</div>
+            </div>
+            <div className="answerBoxLine2">
+                {answer.comments && (
+                    <AnswerCommentsWrapper
+                        selectedQuestion={selectedQuestion}
+                        answer={answer}
+                        newCommentCounter={newCommentCounter}
+                    />
+                )}
+            </div>
+            {!isGuest && (
+                <div className="answerBoxLine3">
+                    <input
+                        id="addNewAnswerComment"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onKeyDown={(e) => answerAddComment(e)}
+                    ></input>
+                </div>
+            )}
         </div>
     );
 }
@@ -255,6 +674,9 @@ export {
     AnswersContainer,
     AnswersPageHeader,
     QuestionWrapper,
+    QuestionCommentsWrapper,
+    AnswerCommentsWrapper,
+    Comment,
     AnswersWrapper,
     Answer,
 };
