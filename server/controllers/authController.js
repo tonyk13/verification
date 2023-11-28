@@ -118,3 +118,31 @@ module.exports.LoggedIn = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+module.exports.getUsername = async (req, res) => {
+    try {
+        const user = await User.findById(req.params._id).exec();
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(user.username);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+module.exports.getUserReputation = async (req, res) => {
+    try {
+        const user = await User.findById(req.params._id).exec();
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(user.reputation);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
