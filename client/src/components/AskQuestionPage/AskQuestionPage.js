@@ -2,27 +2,44 @@ import React, { useState, useEffect } from "react";
 import "./AskQuestionPage.css";
 
 export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigger, tags }) {
-    //pqNE1
+
+    //PQ Title Handler
     const [pqNE1, setpqNE1] = useState(true);
+    const [pqTitleText, setpqTitleText] = useState('');
     const handlepqTiteTextarea = (event) => {
-        const pqTitleText = event.target.value;
-        if (pqTitleText !== "") {
+        const updatepqTitleText = event.target.value.replace(/\n/g, '');
+        setpqTitleText(updatepqTitleText);
+    
+        if (updatepqTitleText.replace(/\s/g, '') !== "") {
             setpqNE1(false);
         } else {
             setpqNE1(true);
         }
     };
 
-    //pqNE2
+    //PQ Summary Handler
     const [pqNE2, setpqNE2] = useState(true);
-    const [pqHLE1, setpqHLE1] = useState(false);
-
-    const handlepqQuestionTextarea = (event) => {
-        const pqQuestionText = event.target.value;
-        if (pqQuestionText !== "") {
+    const [pqSummaryText, setpqSummaryText] = useState('');
+    const handlepqSummaryTextarea = (event) => {
+        const updatepqSummaryText = event.target.value.replace(/\n/g, '');
+        setpqSummaryText(updatepqSummaryText);
+    
+        if (updatepqSummaryText.replace(/\s/g, '') !== "") {
             setpqNE2(false);
         } else {
             setpqNE2(true);
+        }
+    };
+
+    //PQ Text Handler
+    const [pqNE3, setpqNE3] = useState(true);
+    const [pqHLE1, setpqHLE1] = useState(false);
+    const handlepqQuestionTextarea = (event) => {
+        const pqQuestionText = event.target.value;
+        if (pqQuestionText.replace(/[\s\n]/g, '') !== "") {
+            setpqNE3(false);
+        } else {
+            setpqNE3(true);
         }
 
         //HyperLink Checking
@@ -43,10 +60,12 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
         setpqHLE1(hasInvalidHyperlink);
     };
 
-    //pqNE3
-    const [pqNE3, setpqNE3] = useState(true);
+
+    
+    //PQ Tags Handler
+    const [pqNE4, setpqNE4] = useState(true);
     const [pqTE1, setpqTE1] = useState(false);
-    let pqTagsText = "";
+    const [pqTagsText ,setpqTagsText] = useState('');
     const [pqTagStringArray, setpqTagStringArray] = useState([]);
 
     function askQuestionValidTagsCheck(pqTagStringArray) {
@@ -102,13 +121,14 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
     }
 
     const handlepqTagsTextarea = (event) => {
-        pqTagsText = event.target.value;
+        const updatepqTagsText = event.target.value.replace(/\n/g, '');
+        setpqTagsText(updatepqTagsText);
         setpqTagStringArray(pqTagsText.toLowerCase().trim().split(/\s+/));
 
-        if (pqTagsText !== "") {
-            setpqNE3(false);
+        if (updatepqTagsText.replace(/\s/g, '') !== "") {
+            setpqNE4(false);
         } else {
-            setpqNE3(true);
+            setpqNE4(true);
         }
 
         if (!pqNE3) {
@@ -120,17 +140,16 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
         }
     };
 
-    //pqNE4
-    const [pqNE4, setpqNE4] = useState(true);
 
-    const handlepqUsernameTextarea = (event) => {
-        const pqUsernameText = event.target.value;
-        if (pqUsernameText !== "") {
-            setpqNE4(false);
-        } else {
-            setpqNE4(true);
-        }
-    };
+
+
+
+
+
+
+
+
+
 
 
     // Post Question Button
@@ -189,14 +208,17 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
         <div id="askQuestionPage">
             <form id="askQuestionForm">
                 <div>
-                    <label className="askQuestionLabels">Question Title*</label>
+                    <label className="askQuestionLabels">
+                        Question Title*
+                    </label>
                     <label className="askQuestionSubLabels">
-                        Limit title to 100 characters or less
+                        Limit title to 50 characters or less
                     </label>
                     <textarea
                         id="pqTitle"
-                        maxLength="100"
+                        maxLength="50"
                         onChange={handlepqTiteTextarea}
+                        value={pqTitleText}
                     ></textarea>
                     <label
                         id="pqNE1"
@@ -207,17 +229,43 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
                     </label>
                 </div>
 
-                <div id="askQuestionTextDiv">
-                    <label className="askQuestionLabels">Question Text*</label>
-                    <label className="askQuestionSubLabels">Add details</label>
+                <div> 
+                    <label className="askQuestionLabels">
+                        Question Summary*
+                    </label>
+                    <label className="askQuestionSubLabels">
+                        Limit title to 140 characters or less
+                    </label>
                     <textarea
-                        id="pqText"
-                        onChange={handlepqQuestionTextarea}
+                        id="pqSummary"
+                        maxLength="140"
+                        onChange={handlepqSummaryTextarea}
+                        value={pqSummaryText}
                     ></textarea>
                     <label
                         id="pqNE2"
                         className="pqNullError"
                         style={{ display: pqNE2 ? "block" : "none" }}
+                    >
+                        Please fill in a value
+                    </label>
+                </div>
+
+                <div id="askQuestionTextDiv">
+                    <label className="askQuestionLabels">
+                        Question Text*
+                    </label>
+                    <label className="askQuestionSubLabels">
+                        Add details
+                    </label>
+                    <textarea
+                        id="pqText"
+                        onChange={handlepqQuestionTextarea}
+                    ></textarea>
+                    <label
+                        id="pqNE3"
+                        className="pqNullError"
+                        style={{ display: pqNE3 ? "block" : "none" }}
                     >
                         Please fill in a value
                     </label>
@@ -231,18 +279,21 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
                 </div>
 
                 <div>
-                    <label className="askQuestionLabels">Tags*</label>
+                    <label className="askQuestionLabels">
+                        Tags*
+                    </label>
                     <label className="askQuestionSubLabels">
                         Add keywords separated by whitespace
                     </label>
                     <textarea
                         id="pqTags"
                         onChange={handlepqTagsTextarea}
+                        value={pqTagsText}
                     ></textarea>
                     <label
-                        id="pqNE3"
+                        id="pqNE4"
                         className="pqNullError"
-                        style={{ display: pqNE3 ? "block" : "none" }}
+                        style={{ display: pqNE4 ? "block" : "none" }}
                     >
                         Please fill in a value
                     </label>
@@ -252,21 +303,6 @@ export default function AskQuestionPage({ setCurrentPage, setDataBaseUpdateTrigg
                         style={{ display: pqTE1 ? "block" : "none" }}
                     >
                         Tags must be under 10 characters and a maximum of 5 tags
-                    </label>
-                </div>
-
-                <div>
-                    <label className="askQuestionLabels">Username*</label>
-                    <textarea
-                        id="pqUsername"
-                        onChange={handlepqUsernameTextarea}
-                    ></textarea>
-                    <label
-                        id="pqNE4"
-                        className="pqNullError"
-                        style={{ display: pqNE4 ? "block" : "none" }}
-                    >
-                        Please fill in a value
                     </label>
                 </div>
 
