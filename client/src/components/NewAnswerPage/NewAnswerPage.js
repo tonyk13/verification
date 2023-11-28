@@ -25,10 +25,7 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
         for (const hl of hyperlinkMatches) {
             let hlURL = hl[2];
 
-            if (
-                hlURL.trim() === "" ||
-                (!hlURL.startsWith("http://") && !hlURL.startsWith("https://"))
-            ) {
+            if (hlURL.trim() === "" || (!hlURL.startsWith("http://") && !hlURL.startsWith("https://"))) {
                 hasInvalidHyperlink = true;
                 break;
             }
@@ -51,15 +48,12 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
         }
 
         try {
-            const response = await axios.post(
-                `http://localhost:8000/api/questions/${selectedQuestion._id}/answers`,
-                {
-                    text: answer,
-                    ans_by: username,
-                }
-            );
+            const response = await axios.post(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers`, {
+                text: answer,
+                ans_by: username,
+            });
 
-            selectedQuestion = response.data.updatedQuestion;
+            selectedQuestion = response.data.updatedQuestion; // do something similar when you add a comment to an answer
 
             setCurrentPage("answersPage");
         } catch (error) {
@@ -73,29 +67,15 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
             <form onSubmit={handleSubmit}>
                 <div className="answerQuestionLabels">
                     <label htmlFor="username">Username*</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value={username}
-                        onChange={handleUsernameChange}
-                    />
+                    <input type="text" id="username" value={username} onChange={handleUsernameChange} />
                 </div>
                 <div className="answerQuestionLabels">
                     <label htmlFor="answerText">Answer Text*</label>
-                    <textarea
-                        value={answer}
-                        onChange={handleAnswerChange}
-                        id="answerQuestionTextDiv"
-                    />
+                    <textarea value={answer} onChange={handleAnswerChange} id="answerQuestionTextDiv" />
                 </div>
                 {error && <p className="aqNullError">{error}</p>}
                 <div id="answerQuestionLastLine">
-                    <button
-                        id="postAnswerButton"
-                        type="submit"
-                        className="answerQuestionButton"
-                        onClick={handleSubmit}
-                    >
+                    <button id="postAnswerButton" type="submit" className="answerQuestionButton" onClick={handleSubmit}>
                         Post Answer
                     </button>
                 </div>

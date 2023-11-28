@@ -1,16 +1,25 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import axios from "axios";
 import "./WelcomePage.css";
 import Cookie from "js-cookie";
 
-function WelcomePage({ setCurrentPage, setIsLoggedIn, isGuest, setIsGuest }) {
+function WelcomePage({ setCurrentPage, setIsLoggedIn, isGuest, setIsGuest, isOnline }) {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+
+    if (!isOnline) {
+        return (
+            <div id="welcomePage">
+                <h1>Fake Stack Overflow</h1>
+                <h3>You are currently offline. Please connect to the internet to continue.</h3>
+            </div>
+        );
+    }
 
     if (!isLoggingIn && !isCreatingAccount) {
         return (
             <div id="welcomePage">
-                <h1>FAKE STACK OVERFLOW</h1>
+                <h1>Fake Stack Overflow</h1>
                 <h2>Got questions? We have the answers.</h2>
                 <WelcomePageBox
                     isLoggingIn={isLoggingIn}
@@ -27,8 +36,8 @@ function WelcomePage({ setCurrentPage, setIsLoggedIn, isGuest, setIsGuest }) {
     } else if (isLoggingIn) {
         return (
             <div id="welcomePage">
-                <h1>FAKE STACK OVERFLOW</h1>
-                <h2>Log In</h2>
+                <h1>Fake Stack Overflow</h1>
+                <h2>Log in</h2>
                 <WelcomePageBox
                     isLoggingIn={isLoggingIn}
                     setIsLoggingIn={setIsLoggingIn}
@@ -44,7 +53,7 @@ function WelcomePage({ setCurrentPage, setIsLoggedIn, isGuest, setIsGuest }) {
     } else if (isCreatingAccount) {
         return (
             <div id="welcomePage">
-                <h1>FAKE STACK OVERFLOW</h1>
+                <h1>Fake Stack Overflow</h1>
                 <h2>Create Account</h2>
                 <WelcomePageBox
                     isLoggingIn={isLoggingIn}
@@ -141,10 +150,6 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
             setPasswordError("Password field cannot be empty");
         }
 
-        if (emailError !== "" || passwordError !== "") {
-            return;
-        }
-
         try {
             const response = await axios.post("http://localhost:8000/api/login", {
                 email,
@@ -156,10 +161,8 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
             if (!data.success) {
                 if (data.message === "There is no account registered with this email") {
                     setEmailError("There is no account registered with this email");
-                    return;
                 } else if (data.message === "Incorrect password") {
                     setPasswordError("Incorrect password");
-                    return;
                 }
             } else {
                 setEmail("");
@@ -171,7 +174,7 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
 
                 console.log("Successfully logged in");
 
-                Cookie.set("auth", email, { expires: 7 });
+                Cookie.set("auth", data.message, { expires: 7 });
 
                 return;
             }
@@ -244,7 +247,7 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
                     </label>
                 </div>
                 <span>
-                    <input type="submit" id="loginButton" value="Log In" onClick={handleSubmit} />
+                    <input type="submit" id="loginButton" value="Log in" onClick={handleSubmit} />
                 </span>
                 <span>
                     <input type="button" id="goBackButton" value="Go Back" onClick={() => setIsLoggingIn(false)} />
@@ -257,7 +260,7 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
 function LoginButton({ handleLoginClick }) {
     return (
         <div className="loginButton" onClick={handleLoginClick}>
-            Log In
+            Log in
         </div>
     );
 }
@@ -287,56 +290,70 @@ function CreateAccountForm({ setIsLoggingIn, setIsCreatingAccount }) {
         setPasswordVerificationError("");
 
         if (username === "") {
-            setUsernameError("Username field cannot be empty");
+            setUsernameError("Username is required");
         }
 
         if (email === "") {
-            setEmailError("Email field cannot be empty");
+            setEmailError("Email is required");
         } else if (!validateEmail(email)) {
             setEmailError("Invalid email format");
         }
 
         if (password === "") {
-            setPasswordError("Password field cannot be empty");
-        } else if (password.includes(username) && username !== "") {
+            setPasswordError("Password is required");
+        }
+
+        if (password.includes(username) && username !== "") {
+            console.log("Username: ", username);
+            console.log("Password: ", password);
             setPasswordError("Password cannot contain username");
-        } else if (password.includes(email) && email !== "") {
+            console.log("Password error: ", passwordError);
+        }
+
+        if (password.includes(email) && email !== "") {
             setPasswordError("Password cannot contain email");
         }
 
         if (passwordVerification === "") {
-            setPasswordVerificationError("Password verification field cannot be empty");
+            setPasswordVerificationError("Password verification is required");
         } else if (password !== passwordVerification) {
             setPasswordVerificationError("Passwords do not match");
         }
 
-        if (usernameError !== "" || emailError !== "" || passwordError !== "" || passwordVerificationError !== "") {
-            return;
-        }
-
         const passwordHash = password;
+        const passwordHashVerification = passwordVerification;
 
         try {
             const response = await axios.post("http://localhost:8000/api/createaccount", {
                 email,
                 username,
                 passwordHash,
+                passwordHashVerification,
             });
 
-            console.log("Result of attempting to create account: ", response.data);
+            const data = response.data;
 
-            if (response.data.message === "User account with this email already exists") {
-                setEmailError(response.data.message);
-                return;
+            if (!data.success) {
+                if (data.message === "Email is required") {
+                    setEmailError(data.message);
+                } else if (data.message === "Password is required") {
+                    setPasswordError(data.message);
+                } else if (data.message === "Password cannot contain username or email") {
+                    setPasswordError(data.message);
+                } else if (data.message === "Passwords do not match") {
+                    setPasswordVerificationError(data.message);
+                } else if (data.message === "User account with this email already exists") {
+                    setEmailError(data.message);
+                }
+            } else {
+                setUsername("");
+                setEmail("");
+                setPassword("");
+                setPasswordVerification("");
+
+                setIsCreatingAccount(false);
+                setIsLoggingIn(true);
             }
-
-            setUsername("");
-            setEmail("");
-            setPassword("");
-            setPasswordVerification("");
-
-            setIsCreatingAccount(false);
-            setIsLoggingIn(true);
         } catch (error) {
             console.error("Error creating account:", error);
         }

@@ -20,6 +20,25 @@ function App() {
     const [tagClicked, setTagClicked] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isGuest, setIsGuest] = useState(false);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+    useEffect(() => {
+        const handleOnline = () => {
+            setIsOnline(true);
+        };
+
+        const handleOffline = () => {
+            setIsOnline(false);
+        };
+
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+        };
+    }, []);
 
     useEffect(() => {
         const user = Cookie.get("auth");
@@ -98,6 +117,7 @@ function App() {
                     databaseUpdateTrigger={databaseUpdateTrigger}
                     tagClicked={tagClicked}
                     setTagClicked={setTagClicked}
+                    isGuest={isGuest}
                 />
             );
         } else if (currentPage === "tagsPage") {
@@ -135,6 +155,8 @@ function App() {
                     selectedQuestion={selectedQuestion}
                     setCurrentPage={setCurrentPage}
                     setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                    tags={tags}
+                    isGuest={isGuest}
                 />
             );
         }
@@ -142,7 +164,7 @@ function App() {
 
     return (
         <div className="app">
-            {isLoggedIn || isGuest ? (
+            {isOnline && (isLoggedIn || isGuest) ? (
                 <div className="page">
                     <Header setSearch={setSearch} handleLogout={handleLogout} isGuest={isGuest} />
                     <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
@@ -155,6 +177,7 @@ function App() {
                         setIsLoggedIn={setIsLoggedIn}
                         isGuest={isGuest}
                         setIsGuest={setIsGuest}
+                        isOnline={isOnline}
                     />
                 </div>
             )}

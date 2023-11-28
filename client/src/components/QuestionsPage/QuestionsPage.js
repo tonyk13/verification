@@ -27,9 +27,7 @@ function QuestionBox({
                 <p
                     class="questionTitle"
                     onClick={() => {
-                        const selectedQuestion = questionsArray.find(
-                            (question) => question.title === questionTitle
-                        );
+                        const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
                         setSelectedQuestion(selectedQuestion);
                         selectedQuestion.views += 1;
                         setCurrentPage("answersPage");
@@ -119,15 +117,10 @@ function formatDate(dateString) {
         return `${timeDifferenceInSeconds} seconds ago`;
     } else if (time.getFullYear() < currentYear) {
         return `${monthString} ${time.getDate()}, ${time.getFullYear()} at ${hourString}:${minuteString}`;
-    } else if (
-        time.getDate() > currentTime.getDate() &&
-        time.getMonth() !== currentTime.getMonth()
-    ) {
+    } else if (time.getDate() > currentTime.getDate() && time.getMonth() !== currentTime.getMonth()) {
         return `${monthString} ${time.getDate()}, at ${hourString}:${minuteString}`;
     } else if (currentTime.getHours() - time.getHours() !== 0) {
-        return `${Math.abs(
-            currentTime.getHours() - time.getHours()
-        )} hours ago`;
+        return `${Math.abs(currentTime.getHours() - time.getHours())} hours ago`;
     } else if (currentTime.getMinutes() - time.getMinutes() !== 0) {
         return `${currentTime.getMinutes() - time.getMinutes()} minutes ago`;
     } else {
@@ -136,12 +129,7 @@ function formatDate(dateString) {
 }
 
 //All Questions
-function renderAllQuestions(
-    questions,
-    setCurrentPage,
-    setSelectedQuestion,
-    tagsArray
-) {
+function renderAllQuestions(questions, setCurrentPage, setSelectedQuestion, tagsArray) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
     return questions.map((question) => (
@@ -176,9 +164,7 @@ function getQuestionfromAnswer(questionsArray, answerID) {
 function activeSort(questionsArray, answersArray) {
     let returnArray = [];
 
-    const activeSortTempArray = answersArray.sort(
-        (a, b) => new Date(a.ans_date_time) - new Date(b.ans_date_time)
-    );
+    const activeSortTempArray = answersArray.sort((a, b) => new Date(a.ans_date_time) - new Date(b.ans_date_time));
 
     for (const answer of activeSortTempArray) {
         const question = getQuestionfromAnswer(questionsArray, answer._id);
@@ -190,13 +176,7 @@ function activeSort(questionsArray, answersArray) {
 }
 
 //Render Active Questions
-function renderActiveQuestions(
-    questions,
-    answers,
-    setCurrentPage,
-    setSelectedQuestion,
-    tagsArray
-) {
+function renderActiveQuestions(questions, answers, setCurrentPage, setSelectedQuestion, tagsArray) {
     let activeQuestions = activeSort(questions, answers);
     return activeQuestions.map((question) => (
         <QuestionBox
@@ -215,17 +195,10 @@ function renderActiveQuestions(
 }
 
 //Render Unanswered Questions
-function renderUnansweredQuestions(
-    questions,
-    setCurrentPage,
-    setSelectedQuestion,
-    tagsArray
-) {
+function renderUnansweredQuestions(questions, setCurrentPage, setSelectedQuestion, tagsArray) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
-    let unansweredQuestions = questions.filter(
-        (question) => question.answers.length === 0
-    );
+    let unansweredQuestions = questions.filter((question) => question.answers.length === 0);
 
     if (unansweredQuestions.length === 0) {
         return "No Questions Found";
@@ -246,13 +219,7 @@ function renderUnansweredQuestions(
     ));
 }
 
-function renderSearchResults(
-    questions,
-    setCurrentPage,
-    setSelectedQuestion,
-    searchResultsQuestionArrayRef,
-    tagsArray
-) {
+function renderSearchResults(questions, setCurrentPage, setSelectedQuestion, searchResultsQuestionArrayRef, tagsArray) {
     return searchResultsQuestionArrayRef.current.map((question) => (
         <QuestionBox
             key={question.id}
@@ -279,6 +246,7 @@ function QuestionsPage({
     databaseUpdateTrigger,
     tagClicked,
     setTagClicked,
+    isGuest,
 }) {
     /*Convert questions and tags into an Array*/
     const [questionsArray, setQuestionsArray] = useState([]);
@@ -310,9 +278,7 @@ function QuestionsPage({
             try {
                 let allAnswers = [];
                 for (const question of questionsArray) {
-                    const response = await axios.get(
-                        `http://localhost:8000/api/questions/${question._id}/answers`
-                    );
+                    const response = await axios.get(`http://localhost:8000/api/questions/${question._id}/answers`);
                     const answers = response.data;
 
                     allAnswers = allAnswers.concat(answers);
@@ -338,10 +304,7 @@ function QuestionsPage({
 
     const displayUnansweredQuestions = () => {
         setSort("Unanswered");
-        setNoq(
-            questionsArray.filter((question) => question.answers.length === 0)
-                .length
-        );
+        setNoq(questionsArray.filter((question) => question.answers.length === 0).length);
     };
 
     //Searching Functionality
@@ -350,13 +313,12 @@ function QuestionsPage({
     const searchResultsQuestionArrayRef = useRef([]);
 
     useEffect(() => {
-        if (currentSearch !== "" ) {
+        if (currentSearch !== "") {
             parseSearch(currentSearch);
-            searchResultsQuestionArrayRef.current =
-                keywordTagArraysToSearchArray(
-                    keywordSearchArray.current,
-                    tagSearchArray.current
-                );
+            searchResultsQuestionArrayRef.current = keywordTagArraysToSearchArray(
+                keywordSearchArray.current,
+                tagSearchArray.current
+            );
             setSort("Search");
             setNoq(searchResultsQuestionArrayRef.current.length);
         } else {
@@ -388,10 +350,7 @@ function QuestionsPage({
         keywordSearchArray = keywordSearchArray.filter((word) => word !== "");
         for (const searchWord of keywordSearchArray) {
             for (const question of questionsArray) {
-                if (
-                    question.title.toLowerCase().match(searchWord) ||
-                    question.text.toLowerCase().match(searchWord)
-                ) {
+                if (question.title.toLowerCase().match(searchWord) || question.text.toLowerCase().match(searchWord)) {
                     searchResultsQuestionArray.push(question);
                 }
             }
@@ -401,9 +360,7 @@ function QuestionsPage({
         for (const question of questionsArray) {
             for (const tagWord of tagSearchArray) {
                 for (const tagsPointer of question.tags) {
-                    const tagsNamePointer = tagsArray.find(
-                        (tag) => tag._id === tagsPointer
-                    ).name;
+                    const tagsNamePointer = tagsArray.find((tag) => tag._id === tagsPointer).name;
                     if (tagsNamePointer === tagWord) {
                         searchResultsQuestionArray.push(question);
                     }
@@ -413,9 +370,7 @@ function QuestionsPage({
 
         //Removing Dupes
         let uniqueSearchResultsSet = new Set(searchResultsQuestionArray);
-        let uniqueSearchResultsQuestionArray = Array.from(
-            uniqueSearchResultsSet
-        );
+        let uniqueSearchResultsQuestionArray = Array.from(uniqueSearchResultsSet);
         return uniqueSearchResultsQuestionArray;
     }
 
@@ -434,13 +389,11 @@ function QuestionsPage({
                         {sort === "Unanswered" && "Unanswered Questions"}
                         {sort === "Search" && "Search Results"}
                     </div>
-                    <button
-                        type="button"
-                        className="askQuestionButton"
-                        onClick={loadAskQuestionPage}
-                    >
-                        Ask Question
-                    </button>
+                    {!isGuest && (
+                        <button type="button" className="askQuestionButton" onClick={loadAskQuestionPage}>
+                            Ask Question
+                        </button>
+                    )}
                 </div>
 
                 <div id="qphRow2">
@@ -448,37 +401,19 @@ function QuestionsPage({
                     <div id="questionsStatusButtons">
                         <button onClick={displayAllQuestions}>Newest</button>
                         <button onClick={displayActiveQuestions}>Active</button>
-                        <button onClick={displayUnansweredQuestions}>
-                            Unanswered
-                        </button>
+                        <button onClick={displayUnansweredQuestions}>Unanswered</button>
                     </div>
                 </div>
             </div>
 
             <div id="questionsWrapper">
                 {sort === "Newest" &&
-                    renderAllQuestions(
-                        questionsArray,
-                        setCurrentPage,
-                        setSelectedQuestion,
-                        tagsArray
-                    )}
+                    renderAllQuestions(questionsArray, setCurrentPage, setSelectedQuestion, tagsArray)}
 
                 {sort === "Active" &&
-                    renderActiveQuestions(
-                        questionsArray,
-                        answersArray,
-                        setCurrentPage,
-                        setSelectedQuestion,
-                        tagsArray
-                    )}
+                    renderActiveQuestions(questionsArray, answersArray, setCurrentPage, setSelectedQuestion, tagsArray)}
                 {sort === "Unanswered" &&
-                    renderUnansweredQuestions(
-                        questionsArray,
-                        setCurrentPage,
-                        setSelectedQuestion,
-                        tagsArray
-                    )}
+                    renderUnansweredQuestions(questionsArray, setCurrentPage, setSelectedQuestion, tagsArray)}
                 {sort === "Search" &&
                     renderSearchResults(
                         questionsArray,
