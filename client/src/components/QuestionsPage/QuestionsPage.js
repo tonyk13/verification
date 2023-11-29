@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./QuestionsPage.css";
 import axios from "axios";
+import UpvoteButton from "../VotingButtons/UpvoteButton";
+import DownvoteButton from "../VotingButtons/DownvoteButton";
 
 //questionBox
 function QuestionBox({
@@ -15,15 +17,65 @@ function QuestionBox({
     questions,
     tagsArray,
     questionsArray,
+    isGuest
 }) {
     const tidToTagName = (tid) => {
         const tag = tagsArray.find((tag) => tag._id === tid);
         return tag ? tag.name : "";
     };
+    
+    const [questionVotes, setQuestionVotes] = useState(questions.votes);
+    useEffect(() => {
+        if (questions) {
+            axios
+                .get(`http://localhost:8000/api/questions/${questions._id}/votes`)
+                .then((response) => {
+                    setQuestionVotes(response.data.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    });
+
+    function handleQuestionUpvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${questions._id}/upvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function handleQuestionDownvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${questions._id}/downvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
 
     return (
         <div class="questionBox">
-            <p class="answerViewCount">{answerViewCount}</p>
+            {isGuest ? (
+                        <div className="votesBox">
+                            <div id="voteError">*</div>
+                            <div className="questionVotes">{questionVotes} votes</div>
+                        </div>
+                    ) : (
+                        <div className="votesBox">
+                            {<UpvoteButton handleUpvote={handleQuestionUpvote}></UpvoteButton>}
+                            <div className="questionVotes">{questionVotes} votes</div>
+                            {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
+                        </div>
+            )}
             <div class="titleTagWrapper">
                 <p
                     class="questionTitle"
@@ -49,6 +101,7 @@ function QuestionBox({
                 <p class="askedByName">{askedByName}</p>
                 <p class="askedByTime">{askedByTime}</p>
             </div>
+            <p class="answerViewCount">{answerViewCount}</p>
         </div>
     );
 }
@@ -155,7 +208,8 @@ function renderAllQuestions(
     setSelectedQuestion,
     tagsArray,
     questionPageNumber,
-    setQuestionPageNumber
+    setQuestionPageNumber,
+    isGuest
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
     let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
@@ -178,6 +232,7 @@ function renderAllQuestions(
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
             questionsArray={questions}
+            isGuest={isGuest}
         />
     ));
 }
@@ -216,7 +271,8 @@ function renderActiveQuestions(
     setSelectedQuestion,
     tagsArray,
     questionPageNumber,
-    setQuestionPageNumber
+    setQuestionPageNumber,
+    isGuest
 ) {
     let activeQuestions = activeSort(questions, answers);
     let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
@@ -237,6 +293,7 @@ function renderActiveQuestions(
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
+            isGuest={isGuest}
         />
     ));
 }
@@ -248,7 +305,8 @@ function renderUnansweredQuestions(
     setSelectedQuestion,
     tagsArray,
     questionPageNumber,
-    setQuestionPageNumber
+    setQuestionPageNumber,
+    isGuest
 ) {
     questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
 
@@ -276,6 +334,7 @@ function renderUnansweredQuestions(
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
+            isGuest={isGuest}
         />
     ));
 }
@@ -287,7 +346,8 @@ function renderSearchResults(
     searchResultsQuestionArrayRef,
     tagsArray,
     questionPageNumber,
-    setQuestionPageNumber
+    setQuestionPageNumber,
+    isGuest
 ) {
     let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
         searchResultsQuestionArrayRef.current,
@@ -308,6 +368,7 @@ function renderSearchResults(
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
+            isGuest={isGuest}
         />
     ));
 }
@@ -509,7 +570,7 @@ function QuestionsPage({
                     </div>
 
                     {isGuest ? (
-                        <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question</div>
+                        <div id="mustBeLoggedInText">*Must Be Logged In to Ask a Question or Vote</div>
                     ) : (
                         <button type="button" className="askQuestionButton" onClick={loadAskQuestionPage}>
                             Ask Question
@@ -535,7 +596,8 @@ function QuestionsPage({
                         setSelectedQuestion,
                         tagsArray,
                         questionPageNumber,
-                        setQuestionPageNumber
+                        setQuestionPageNumber,
+                        isGuest
                     )}
 
                 {sort === "Active" &&
@@ -546,7 +608,8 @@ function QuestionsPage({
                         setSelectedQuestion,
                         tagsArray,
                         questionPageNumber,
-                        setQuestionPageNumber
+                        setQuestionPageNumber,
+                        isGuest
                     )}
                 {sort === "Unanswered" &&
                     renderUnansweredQuestions(
@@ -555,7 +618,8 @@ function QuestionsPage({
                         setSelectedQuestion,
                         tagsArray,
                         questionPageNumber,
-                        setQuestionPageNumber
+                        setQuestionPageNumber,
+                        isGuest
                     )}
                 {sort === "Search" &&
                     renderSearchResults(
@@ -565,7 +629,8 @@ function QuestionsPage({
                         searchResultsQuestionArrayRef,
                         tagsArray,
                         questionPageNumber,
-                        setQuestionPageNumber
+                        setQuestionPageNumber,
+                        isGuest
                     )}
             </div>
             <div id="questionPageSelector">
