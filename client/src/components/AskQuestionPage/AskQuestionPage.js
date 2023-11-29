@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./AskQuestionPage.css";
 import Cookie from "js-cookie";
+import axios from "axios";
+
 
 export default function AskQuestionPage({ 
     setCurrentPage, 
@@ -127,14 +129,14 @@ export default function AskQuestionPage({
     const handlepqTagsTextarea = (event) => {
         const updatepqTagsText = event.target.value.replace(/\n/g, '');
         setpqTagsText(updatepqTagsText);
-        setpqTagStringArray(pqTagsText.toLowerCase().trim().split(/\s+/));
+        setpqTagStringArray(updatepqTagsText.toLowerCase().trim().split(/\s+/));
 
         if (updatepqTagsText.replace(/\s/g, '') !== "") {
             setpqNE4(false);
         } else {
             setpqNE4(true);
         }
-
+   
         if (!pqNE3) {
             if (askQuestionValidTagsCheck(pqTagStringArray)) {
                 setpqTE1(false);
@@ -144,26 +146,25 @@ export default function AskQuestionPage({
         }
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
     // Post Question Button
     const handlePostQuestionButton = async (event) => {
         try {
         event.preventDefault();
-    
+        
         if (!pqNE1 && !pqNE2 && !pqHLE1 && !pqNE3 && !pqTE1 && !pqNE4) {
             let pqTagArray = await checkQuestionTags(pqTagStringArray);
-            const pqUsername = Cookie.get("auth");
+            const userid = Cookie.get("userid");
+            
+            let pqReputation = "";
+            let pqUsername = "";
+
+            try {
+                const response = await axios.get(`http://localhost:8000/api/getUsername/${userid}`);
+                pqUsername = response.data.username;
+            } catch (error) {
+                console.error('Error fetching user reputation:', error);
+            }
+   
     
             // Post Question
             let postQuestion = {
@@ -175,8 +176,10 @@ export default function AskQuestionPage({
                 asked_by: pqUsername,
                 ask_date_time: new Date(),
                 views: 0,
+                comments: new Array(0),
+                votes: 0,
             };
-    
+
             // Fetch
             const response = await fetch('http://localhost:8000/api/questions', {
             method: 'POST',
@@ -187,7 +190,7 @@ export default function AskQuestionPage({
             });
     
             const data = await response.json();
-    
+
             setCurrentPage("questionsPage");
     
             // Update trigger

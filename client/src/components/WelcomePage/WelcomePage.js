@@ -175,6 +175,7 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
                 console.log("Successfully logged in");
 
                 Cookie.set("auth", data.message, { expires: 7 });
+                Cookie.set("userid", data._id, {expires: 7});
 
                 return;
             }

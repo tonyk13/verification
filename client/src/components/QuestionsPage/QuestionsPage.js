@@ -6,6 +6,7 @@ import axios from "axios";
 function QuestionBox({
     answerViewCount,
     questionTitle,
+    questionSummary,
     qTagArray,
     askedByName,
     askedByTime,
@@ -34,6 +35,9 @@ function QuestionBox({
                     }}
                 >
                     {questionTitle}
+                </p>
+                <p class="questionSummary">
+                    {questionSummary}
                 </p>
                 <div class="questionTags">
                     {qTagArray.map((tid) => (
@@ -165,6 +169,7 @@ function renderAllQuestions(
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
+            questionSummary={question.summary}
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
@@ -224,6 +229,7 @@ function renderActiveQuestions(
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
+            questionSummary={question.summary}
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
@@ -262,6 +268,7 @@ function renderUnansweredQuestions(
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
+            questionSummary={question.summary}
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
@@ -293,6 +300,7 @@ function renderSearchResults(
             key={question.id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
+            questionSummary={question.summary}
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}

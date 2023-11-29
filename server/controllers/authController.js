@@ -85,6 +85,7 @@ module.exports.Login = async (req, res, next) => {
 
         res.status(201).json({
             message: user.username,
+            _id: user._id,
             success: true,
         });
 
@@ -120,29 +121,16 @@ module.exports.LoggedIn = async (req, res) => {
 };
 
 module.exports.getUsername = async (req, res) => {
-    try {
-        const user = await User.findById(req.params._id).exec();
+    const objectIdString = req.params._id; 
+    const response = await User.findById(objectIdString);
+    const username = response.username;
+    return res.json({ username });
+}
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json(user.username);
-    } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};
 
 module.exports.getUserReputation = async (req, res) => {
-    try {
-        const user = await User.findById(req.params._id).exec();
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json(user.reputation);
-    } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};
+    const objectIdString = req.params._id; 
+    const response = await User.findById(objectIdString);
+    const reputation = response.reputation;
+    return res.json({ reputation });
+}
