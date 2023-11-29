@@ -6,6 +6,7 @@ var Schema = mongoose.Schema;
 
 var questionsSchema = new Schema({
     title: { type: String, required: true },
+    summary: { type: String, required: true },
     text: { type: String, required: true },
     tags: [{ type: Schema.Types.ObjectId, ref: "tagModel" }],
     answers: [{ type: Schema.Types.ObjectId, ref: "answerModel" }],
