@@ -335,6 +335,7 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
                         <QuestionCommentsWrapper
                             selectedQuestion={selectedQuestion}
                             newCommentCounter={newCommentCounter}
+                            registeredUser={registeredUser}
                         />
                     )}
                     {!isGuest && (
@@ -351,7 +352,7 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
     );
 }
 
-function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter }) {
+function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter, registeredUser }) {
     const [comments, setComments] = useState([]);
 
     const [displayedComments, setDisplayedComments] = useState([]);
@@ -405,14 +406,23 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter }) {
             )}
             <div>
                 {displayedComments.map((comment) => (
-                    <Comment key={comment._id} commentText={comment.text} commentAuthor={comment.author} />
+                    <Comment
+                        key={comment._id}
+                        commentType={"question"}
+                        selectedQuestion={selectedQuestion}
+                        commentId={comment._id}
+                        commentText={comment.text}
+                        commentAuthor={comment.author}
+                        commentVotes={comment.votes}
+                        registeredUser={registeredUser}
+                    />
                 ))}
             </div>
         </div>
     );
 }
 
-function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter }) {
+function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter, registeredUser }) {
     const [comments, setComments] = useState([]);
 
     const [displayedComments, setDisplayedComments] = useState([]);
@@ -465,17 +475,107 @@ function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter }) 
                 </div>
             )}
             {displayedComments.map((comment) => (
-                <Comment key={comment._id} commentText={comment.text} commentAuthor={comment.author} />
+                <Comment
+                    key={comment._id}
+                    commentType={"answer"}
+                    answer={answer}
+                    selectedQuestion={selectedQuestion}
+                    commentId={comment._id}
+                    commentText={comment.text}
+                    commentAuthor={comment.author}
+                    commentVotes={comment.votes}
+                    registeredUser={registeredUser}
+                />
             ))}
         </div>
     );
 }
 
-function Comment({ commentText, commentAuthor }) {
+function Comment({
+    commentType,
+    answer,
+    selectedQuestion,
+    commentId,
+    commentText,
+    commentAuthor,
+    commentVotes,
+    registeredUser,
+}) {
+    const [votes, setVotes] = useState(commentVotes);
+
+    useEffect(() => {
+        setVotes(commentVotes);
+    }, [commentVotes]);
+
+    function handleCommentUpvote(commentId) {
+        if (commentType === "question") {
+            axios
+                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/upvote`)
+                .then((response) => {
+                    const updatedComment = response.data;
+                    setVotes(updatedComment.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } else if (commentType === "answer") {
+            axios
+                .put(
+                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/upvote`
+                )
+                .then((response) => {
+                    const updatedComment = response.data;
+                    setVotes(updatedComment.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    }
+
+    function handleCommentDownvote(commentId) {
+        if (commentType === "question") {
+            axios
+                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/downvote`)
+                .then((response) => {
+                    const updatedComment = response.data;
+                    setVotes(updatedComment.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        } else if (commentType === "answer") {
+            axios
+                .put(
+                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/downvote`
+                )
+                .then((response) => {
+                    const updatedComment = response.data;
+                    setVotes(updatedComment.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    }
+
     return (
-        <div className="commentBox">
-            <div className="commentText">{commentText}</div>
-            <div className="commentAuthor">{commentAuthor}</div>
+        <div style={{ display: "flex", flexDirection: "row", marginTop: "20px" }}>
+            <div>
+                <div className="votesBox">
+                    {registeredUser && (
+                        <UpvoteButton handleUpvote={() => handleCommentUpvote(commentId)}></UpvoteButton>
+                    )}
+                    <div className="questionVotes">{votes} votes</div>
+                    {registeredUser && (
+                        <DownvoteButton handleDownvote={() => handleCommentDownvote(commentId)}></DownvoteButton>
+                    )}
+                </div>
+            </div>
+            <div className="commentBox">
+                <div className="commentText">{commentText}</div>
+                <div className="commentAuthor">{commentAuthor}</div>
+            </div>
         </div>
     );
 }
@@ -503,34 +603,6 @@ const AnswersWrapper = ({
         }
         setStartIndex(newIndex);
     };
-
-    function handleAnswerUpvote(answerId) {
-        axios
-            .put(`http://localhost:8000/api/answers/${answerId}/upvote`)
-            .then((response) => {
-                const updatedAnswer = response.data;
-                const answerIndex = answers.findIndex((answer) => answer._id === updatedAnswer._id);
-                answers[answerIndex] = updatedAnswer;
-                setStartIndex(startIndex);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
-    function handleAnswerDownvote(answerId) {
-        axios
-            .put(`http://localhost:8000/api/answers/${answerId}/downvote`)
-            .then((response) => {
-                const updatedAnswer = response.data;
-                const answerIndex = answers.findIndex((answer) => answer._id === updatedAnswer._id);
-                answers[answerIndex] = updatedAnswer;
-                setStartIndex(startIndex);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
 
     answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
 
@@ -600,6 +672,12 @@ function Answer({
     const [answer, setAnswer] = useState([]);
     const [newCommentCounter, setNewCommentCounter] = useState(0);
 
+    const [votes, setVotes] = useState(answerVotes);
+
+    useEffect(() => {
+        setVotes(answerVotes);
+    }, [answerVotes]);
+
     const answerAddComment = (e) => {
         if (e.key === "Enter") {
             axios
@@ -617,6 +695,30 @@ function Answer({
             setNewComment("");
         }
     };
+
+    function handleAnswerUpvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/upvote`)
+            .then((response) => {
+                const updatedAnswer = response.data;
+                setVotes(updatedAnswer.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function handleAnswerDownvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/downvote`)
+            .then((response) => {
+                const updatedAnswer = response.data;
+                setVotes(updatedAnswer.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
 
     // Get the answer
     useEffect(() => {
@@ -638,9 +740,9 @@ function Answer({
         <div className="answerBox">
             <div className="answerBoxLine1">
                 <div className="votesBox">
-                    {registeredUser && <UpvoteButton handleUpvote={handleAnswerUpvote}></UpvoteButton>}
-                    <div className="questionVotes">{answerVotes} votes</div>
-                    {registeredUser && <DownvoteButton handleDownvote={handleAnswerDownvote}></DownvoteButton>}
+                    {registeredUser && <UpvoteButton handleUpvote={() => handleAnswerUpvote()}></UpvoteButton>}
+                    <div className="questionVotes">{votes} votes</div>
+                    {registeredUser && <DownvoteButton handleDownvote={() => handleAnswerDownvote()}></DownvoteButton>}
                 </div>
                 <div className="answerText" dangerouslySetInnerHTML={renderAnswerWithLinks(answerText)} />
                 <div className="answeredByName">{answeredByName}</div>
@@ -652,6 +754,7 @@ function Answer({
                         selectedQuestion={selectedQuestion}
                         answer={answer}
                         newCommentCounter={newCommentCounter}
+                        registeredUser={registeredUser}
                     />
                 )}
             </div>

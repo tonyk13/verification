@@ -228,6 +228,7 @@
     flex-direction: row;
     gap: 10px;
     margin-left: 140px;
+    margin-top: 10px;
 }
 
 .answersPageqTag {

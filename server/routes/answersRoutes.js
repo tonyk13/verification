@@ -17,4 +17,19 @@ router.get("/questions/:questionId/answers/:answerId", answersController.get_ans
 // GET request for an answer's commments.
 router.get("/questions/:questionId/answers/:answerId/comments", answersController.get_answer_comments);
 
+// PUT request for upvoting an answer's comment.
+router.put("/questions/:_id/answers/:answerId/comments/:comment_id/upvote", answersController.answer_comment_upvote);
+
+// PUT request for downvoting an answer's comment.
+router.put(
+    "/questions/:_id/answers/:answerId/comments/:comment_id/downvote",
+    answersController.answer_comment_downvote
+);
+
+// PUT request for upvoting an answer.
+router.put("/questions/:_id/answers/:answerId/upvote", answersController.answer_upvote);
+
+// PUT request for downvoting an answer.
+router.put("/questions/:_id/answers/:answerId/downvote", answersController.answer_downvote);
+
 module.exports = router;

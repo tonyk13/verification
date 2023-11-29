@@ -48,6 +48,24 @@ var userSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    votedQuestions: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "questionModel",
+        },
+    ],
+    votedAnswers: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "answerModel",
+        },
+    ],
+    votedComments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "commentModel",
+        },
+    ],
 });
 
 // userSchema.virtual("url").get(function () {
