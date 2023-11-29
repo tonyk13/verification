@@ -105,7 +105,7 @@ exports.question_add_comment = async (req, res, next) => {
     try {
         const comment = new commentsModel(req.body);
 
-        const question = await questionModel.findById(req.params._id);
+        const question = await questionModel.findById(req.params._id).exec();
 
         if (!question) {
             return res.status(404).json({ message: "Question not found" });
