@@ -121,16 +121,15 @@ module.exports.LoggedIn = async (req, res) => {
 };
 
 module.exports.getUsername = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const username = response.username;
     return res.json({ username });
-}
-
+};
 
 module.exports.getUserReputation = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const reputation = response.reputation;
     return res.json({ reputation });
-}
+};

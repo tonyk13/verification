@@ -503,59 +503,59 @@ function Comment({
 }) {
     const [votes, setVotes] = useState(commentVotes);
 
+    const [hasUpvoted, setHasUpvoted] = useState(false);
+    const [hasDownvoted, setHasDownvoted] = useState(false);
+
+    const [attemptingUpvote, setAttemptingUpvote] = useState(false);
+    const [attemptingDownvote, setAttemptingDownvote] = useState(false);
+
+    const userId = Cookie.get("userid");
+
     useEffect(() => {
         setVotes(commentVotes);
-    }, [commentVotes]);
+    }, [votes]);
 
     function handleCommentUpvote(commentId) {
-        if (commentType === "question") {
+        try {
             axios
-                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/upvote`)
+                .put(`http://localhost:8000/api/comments/${commentId}/users/${userId}/upvote`)
                 .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
+                    if (!response.data.success) {
+                        console.log(response.data.message);
+                    } else {
+                        const updatedComment = response.data;
+                        setVotes(updatedComment.votes);
+                        setHasUpvoted(true);
+                        setAttemptingUpvote(false);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
                 });
-        } else if (commentType === "answer") {
-            axios
-                .put(
-                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/upvote`
-                )
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
+        } catch (error) {
+            console.error(error);
         }
     }
 
     function handleCommentDownvote(commentId) {
-        if (commentType === "question") {
+        try {
             axios
-                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/downvote`)
+                .put(`http://localhost:8000/api/comments/${commentId}/users/${userId}/downvote`)
                 .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
+                    if (!response.data.success) {
+                        console.log(response.data.message);
+                    } else {
+                        const updatedComment = response.data;
+                        setVotes(updatedComment.votes);
+                        setHasDownvoted(true);
+                        setAttemptingDownvote(false);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
                 });
-        } else if (commentType === "answer") {
-            axios
-                .put(
-                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/downvote`
-                )
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -564,11 +564,21 @@ function Comment({
             <div>
                 <div className="votesBox">
                     {registeredUser && (
-                        <UpvoteButton handleUpvote={() => handleCommentUpvote(commentId)}></UpvoteButton>
+                        <UpvoteButton
+                            handleUpvote={() => {
+                                setAttemptingUpvote(true);
+                                handleCommentUpvote(commentId);
+                            }}
+                        ></UpvoteButton>
                     )}
                     <div className="questionVotes">{votes} votes</div>
                     {registeredUser && (
-                        <DownvoteButton handleDownvote={() => handleCommentDownvote(commentId)}></DownvoteButton>
+                        <DownvoteButton
+                            handleDownvote={() => {
+                                setAttemptingDownvote(true);
+                                handleCommentDownvote(commentId);
+                            }}
+                        ></DownvoteButton>
                     )}
                 </div>
             </div>

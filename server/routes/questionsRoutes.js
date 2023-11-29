@@ -26,10 +26,4 @@ router.get("/questions/:_id/comments", questionsController.getQuestionComments);
 // POST request for adding a comment to a question.
 router.post("/questions/:_id/comments", questionsController.question_add_comment);
 
-// PUT request for upvoting a question's comment.
-router.put("/questions/:_id/comments/:comment_id/upvote", questionsController.question_comment_upvote);
-
-// PUT request for downvoting a question's comment.
-router.put("/questions/:_id/comments/:comment_id/downvote", questionsController.question_comment_downvote);
-
 module.exports = router;

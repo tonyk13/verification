@@ -121,39 +121,3 @@ exports.question_add_comment = async (req, res, next) => {
         res.status(400).json({ message: error.message });
     }
 };
-
-exports.question_comment_upvote = async (req, res, next) => {
-    try {
-        const comment = await commentsModel.findByIdAndUpdate(
-            req.params.comment_id,
-            { $inc: { votes: 1 } },
-            { new: true }
-        );
-
-        if (!comment) {
-            return res.status(404).json({ message: "Comment not found" });
-        }
-
-        res.json(comment);
-    } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};
-
-exports.question_comment_downvote = async (req, res, next) => {
-    try {
-        const comment = await commentsModel.findByIdAndUpdate(
-            req.params.comment_id,
-            { $inc: { votes: -1 } },
-            { new: true }
-        );
-
-        if (!comment) {
-            return res.status(404).json({ message: "Comment not found" });
-        }
-
-        res.json(comment);
-    } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
-    }
-};

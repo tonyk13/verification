@@ -18,5 +18,4 @@ router.post("/loggedIn", LoggedIn);
 router.get("/getUsername/:_id", getUsername);
 router.get("/getUserReputation/:_id", getUserReputation);
 
-
 module.exports = router;
