@@ -403,7 +403,7 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter }) {
                     <button onClick={handleNext}>Next</button>
                 </div>
             )}
-            <div style={{}}>
+            <div>
                 {displayedComments.map((comment) => (
                     <Comment key={comment._id} commentText={comment.text} commentAuthor={comment.author} />
                 ))}
