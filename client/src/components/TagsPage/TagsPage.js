@@ -8,7 +8,7 @@ function TagsPage({
     currentSearch,
     setSearch,
     databaseUpdateTrigger,
-    setTagClicked,
+    setSearchTrigger
 }) {
     const [tagsArray, setTagsArray] = useState([]);
     useEffect(() => {
@@ -36,7 +36,7 @@ function TagsPage({
                 currentSearch={currentSearch}
                 setSearch={setSearch}
                 setCurrentPage={setCurrentPage}
-                setTagClicked={setTagClicked}
+                setSearchTrigger={setSearchTrigger}
             />
         </div>
     );
@@ -82,10 +82,10 @@ function TagsContainer({
     currentSearch,
     setSearch,
     setCurrentPage,
-    setTagClicked,
+    setSearchTrigger,
 }) {
     const [tagsAndCounts, setTagsAndCounts] = useState({});
-    setTagClicked(false);
+
     useEffect(() => {
         const updatedTagsAndCounts = questionsArray
             .map((question) =>
@@ -100,18 +100,9 @@ function TagsContainer({
             }, {});
         setTagsAndCounts(updatedTagsAndCounts);
     }, [questionsArray, tagsArray]);
-
-    //Fix timing on handling Click
+    
     const handleTagClick = (tagName) => {
-        setTagClicked(true);
-        const formattedTag = `[${tagName}]`;
-        if (currentSearch === formattedTag) {
-            setSearch("");
-        }
-        setCurrentPage("questionsPage");
-        setTimeout(() => {
-            setSearch(formattedTag);
-        }, "10");
+        setSearchTrigger(tagName)
     };
 
     return (

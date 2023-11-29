@@ -381,8 +381,6 @@ function QuestionsPage({
     setSearch,
     tags,
     databaseUpdateTrigger,
-    tagClicked,
-    setTagClicked,
     isGuest,
 }) {
     /*Convert questions and tags into an Array*/
@@ -464,6 +462,16 @@ function QuestionsPage({
     const searchResultsQuestionArrayRef = useRef([]);
 
     useEffect(() => {
+        const searchbar = document.getElementById("searchbar");
+        if (searchbar !== "") {
+          const searchValue = searchbar.value;
+          setSearch(searchValue);
+        }
+      }, []);
+
+
+    useEffect(() => {
+        
         if (currentSearch !== "") {
             parseSearch(currentSearch);
             searchResultsQuestionArrayRef.current = keywordTagArraysToSearchArray(
