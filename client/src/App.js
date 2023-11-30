@@ -89,9 +89,9 @@ function App() {
                     withCredentials: true,
                 });
                 console.log(response.data);
-
                 if (response.data.success) {
                     Cookie.remove("auth");
+                    Cookie.remove("userid");
                     setIsLoggedIn(false);
                     setCurrentPage("welcomePage");
                     console.log("Logged out successfully!");

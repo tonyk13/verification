@@ -92,8 +92,10 @@ export default function AskQuestionPage({
       }
     }, [tags]);
     
-    async function checkQuestionTags(tagStringArray) {
+    async function checkQuestionTags(tagStringArray, userid) {
         let returnArray = [];
+        let uniqueTags = [...new Set(tagStringArray)];
+        tagStringArray = uniqueTags;
         for (const newTag of tagStringArray) {
             let addNewTag = true;
             for (const tag of tagsArray) {
@@ -108,15 +110,13 @@ export default function AskQuestionPage({
                 };
                 let postTagId = 0;
                 try {
-                    const response = await fetch('http://localhost:8000/api/tags', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify(postTag),
+                    const ptResponse = await axios.post('http://localhost:8000/api/tags', postTag, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
                     });
-                    const data = await response.json();
-                    postTagId = data._id;
+                    postTagId = ptResponse.data._id;
+                    const pqToUserResponse = await axios.post(`http://localhost:8000/api/postTagToUser/${userid}/tags`, ptResponse.data);
                     } catch (error) {
                         console.error('Error:', error);
                 }
@@ -152,9 +152,9 @@ export default function AskQuestionPage({
         event.preventDefault();
         
         if (!pqNE1 && !pqNE2 && !pqHLE1 && !pqNE3 && !pqTE1 && !pqNE4) {
-            let pqTagArray = await checkQuestionTags(pqTagStringArray);
             const userid = Cookie.get("userid");
-            
+            let pqTagArray = await checkQuestionTags(pqTagStringArray, userid);
+     
             let pqReputation = "";
             let pqUsername = "";
 
@@ -180,19 +180,18 @@ export default function AskQuestionPage({
                 votes: 0,
             };
 
-            // Fetch
-            const response = await fetch('http://localhost:8000/api/questions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(postQuestion),
-            });
-    
-            const data = await response.json();
-
+            // POST Question, POST Question to USER
+            try {
+                const pqResponse = await axios.post('http://localhost:8000/api/questions', postQuestion, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }
+                });
+                const pqToUserResponse = await axios.post(`http://localhost:8000/api/postQuestiontoUser/${userid}/questions`, pqResponse.data);
+              } catch (error) {
+                console.error('Error:', error);
+              }
             setCurrentPage("questionsPage");
-    
             // Update trigger
             await handleUpdateTrigger();
         }
