@@ -525,6 +525,8 @@ function Comment({ commentId, commentText, commentAuthor, commentVotes, register
             .then((response) => {
                 if (response.data.success) {
                     setVotes(votes + 1);
+                } else {
+                    alert(response.data.message);
                 }
             })
             .catch((error) => {
