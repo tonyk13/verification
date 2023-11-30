@@ -12,10 +12,10 @@ router.post("/questions/", questionsController.question_create_post);
 router.get("/questions/:_id", questionsController.question_get);
 
 // PUT request for upvoting a question.
-router.put("/questions/:_id/upvote", questionsController.question_upvote);
+router.put("/questions/:questionId/users/:userId/upvote", questionsController.question_upvote);
 
 // PUT request for downvoting a question.
-router.put("/questions/:_id/downvote", questionsController.question_downvote);
+router.put("/questions/:questionId/users/:userId/downvote", questionsController.question_downvote);
 
 // GET request for a question's number of votes.
 router.get("/questions/:_id/votes", questionsController.getQuestionVotes);
@@ -24,12 +24,6 @@ router.get("/questions/:_id/votes", questionsController.getQuestionVotes);
 router.get("/questions/:_id/comments", questionsController.getQuestionComments);
 
 // POST request for adding a comment to a question.
-router.post("/questions/:_id/comments", questionsController.question_add_comment);
-
-// PUT request for upvoting a question's comment.
-router.put("/questions/:_id/comments/:comment_id/upvote", questionsController.question_comment_upvote);
-
-// PUT request for downvoting a question's comment.
-router.put("/questions/:_id/comments/:comment_id/downvote", questionsController.question_comment_downvote);
+router.post("/questions/:questionId/users/:userId/comments", questionsController.question_add_comment);
 
 module.exports = router;

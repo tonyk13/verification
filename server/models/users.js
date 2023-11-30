@@ -54,19 +54,37 @@ var userSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    votedQuestions: [
+    upvotedQuestions: [
         {
             type: Schema.Types.ObjectId,
             ref: "questionModel",
         },
     ],
-    votedAnswers: [
+    downvotedQuestions: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "questionModel",
+        },
+    ],
+    upvotedAnswers: [
         {
             type: Schema.Types.ObjectId,
             ref: "answerModel",
         },
     ],
-    votedComments: [
+    downvotedAnswers: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "answerModel",
+        },
+    ],
+    upvotedComments: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "commentModel",
+        },
+    ],
+    downvotedComments: [
         {
             type: Schema.Types.ObjectId,
             ref: "commentModel",

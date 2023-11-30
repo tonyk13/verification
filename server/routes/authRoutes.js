@@ -51,5 +51,4 @@ router.post("/postTagtoUser/:_id/tags", postTagtoUser);
 // GET request for all user's tags
 router.get("/getUserTags/:_id", getUserTags);
 
-
 module.exports = router;

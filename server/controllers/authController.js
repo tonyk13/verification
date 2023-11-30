@@ -122,26 +122,25 @@ module.exports.LoggedIn = async (req, res) => {
 };
 
 module.exports.getUsername = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const username = response.username;
     return res.json({ username });
-}
-
+};
 
 module.exports.getUserReputation = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const reputation = response.reputation;
     return res.json({ reputation });
-}
+};
 
 module.exports.getUserDateCreated = async (req, res) => {
     const objectIdString = req.params._id; 
     const response = await User.findById(objectIdString);
     const userDateCreated = response.createdAt;
     return res.json({ userDateCreated });
-}
+};
 
 module.exports.postQuestiontoUser = async (req, res) => {
     const objectIdString = req.params._id; 
@@ -156,7 +155,7 @@ module.exports.postQuestiontoUser = async (req, res) => {
     } catch (error) {
       return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 module.exports.getUserQuestions = async (req, res) => {
     const objectIdString = req.params._id; 
@@ -164,7 +163,7 @@ module.exports.getUserQuestions = async (req, res) => {
     const userQuestions = response.questions
     return res.json({ userQuestions });
 
-}
+};
 
 module.exports.postTagtoUser = async (req, res) => {
     const objectIdString = req.params._id; 
@@ -179,13 +178,14 @@ module.exports.postTagtoUser = async (req, res) => {
     } catch (error) {
       return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 module.exports.getUserTags = async (req, res) => {
     const objectIdString = req.params._id; 
     const response = await User.findById(objectIdString);
     const userTags = response.tags
     return res.json({ userTags });
-}
+};
+
 
 
