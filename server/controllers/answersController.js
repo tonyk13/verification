@@ -47,6 +47,25 @@ exports.answer_create_post = async (req, res, next) => {
 // POST request for adding a comment to an answer.
 exports.answer_add_comment = async (req, res, next) => {
     try {
+        const userId = req.params.userId;
+
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.reputation < 50) {
+            return res.json({
+                message: "Error: User's reputation is too low to add a comment (below 50)",
+                success: false,
+            });
+        }
+
+        if (req.body.text.length > 140) {
+            return res.json({ message: "Error: Comment must be less than 140 characters", success: false });
+        }
+
         const comment = new commentsModel(req.body);
 
         const answer = await answersModel.findById(req.params.answerId);
@@ -111,11 +130,29 @@ exports.answer_upvote = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (user.reputation < 50) {
+            return res.json({ message: "Error: User's reputation is too low to vote (below 50)", success: false });
+        }
+
+        const answerId = req.params.answerId;
+
+        const answer = await answersModel.findById(answerId);
+
+        if (!answer) {
+            return res.status(404).json({ message: "Answer not found" });
+        }
+
+        correspondingUser = answer.ans_by;
+        console.log("Corresponding user: ", correspondingUser);
+
+        const correspondingUserInModel = await usersModel.findOne({ username: correspondingUser });
+        console.log("Corresponding user in model: ", correspondingUserInModel);
+
         const upvotedAnswersInUser = user.upvotedAnswers;
         const containsGivenIdInUpvotedAnswers = upvotedAnswersInUser.includes(req.params.answerId);
 
         if (containsGivenIdInUpvotedAnswers) {
-            return res.json({ message: "User has already upvoted this answer", success: false });
+            return res.json({ message: "Error: User has already upvoted this answer", success: false });
         }
 
         const downvotedAnswersInUser = user.downvotedAnswers;
@@ -138,6 +175,14 @@ exports.answer_upvote = async (req, res, next) => {
                 return res.status(404).json({ message: "Answer not found" });
             }
 
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: 10 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
+
             return res.json({ success: true });
         } else {
             await usersModel.findByIdAndUpdate(
@@ -155,6 +200,14 @@ exports.answer_upvote = async (req, res, next) => {
             if (!answer) {
                 return res.status(404).json({ message: "Answer not found" });
             }
+
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: 5 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
 
             return res.json({ success: true });
         }
@@ -174,11 +227,27 @@ exports.answer_downvote = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (user.reputation < 50) {
+            return res.json({ message: "Error: User's reputation is too low to vote (below 50)", success: false });
+        }
+
+        const answerId = req.params.answerId;
+
+        const answer = await answersModel.findById(answerId);
+
+        if (!answer) {
+            return res.status(404).json({ message: "Answer not found" });
+        }
+
+        correspondingUser = answer.ans_by;
+
+        const correspondingUserInModel = await usersModel.findOne({ username: correspondingUser });
+
         const downvotedAnswersInUser = user.downvotedAnswers;
         const containsGivenIdInDownvotedAnswers = downvotedAnswersInUser.includes(req.params.answerId);
 
         if (containsGivenIdInDownvotedAnswers) {
-            return res.json({ message: "User has already downvoted this answer", success: false });
+            return res.json({ message: "Error: User has already downvoted this answer", success: false });
         }
 
         const upvotedAnswersInUser = user.upvotedAnswers;
@@ -201,6 +270,14 @@ exports.answer_downvote = async (req, res, next) => {
                 return res.status(404).json({ message: "Answer not found" });
             }
 
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: -5 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
+
             return res.json({ success: true });
         } else {
             await usersModel.findByIdAndUpdate(
@@ -218,6 +295,14 @@ exports.answer_downvote = async (req, res, next) => {
             if (!answer) {
                 return res.status(404).json({ message: "Answer not found" });
             }
+
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: -10 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
 
             return res.json({ success: true });
         }

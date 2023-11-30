@@ -24,6 +24,6 @@ router.get("/questions/:_id/votes", questionsController.getQuestionVotes);
 router.get("/questions/:_id/comments", questionsController.getQuestionComments);
 
 // POST request for adding a comment to a question.
-router.post("/questions/:_id/comments", questionsController.question_add_comment);
+router.post("/questions/:questionId/users/:userId/comments", questionsController.question_add_comment);
 
 module.exports = router;

@@ -256,6 +256,8 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
             .then((response) => {
                 if (response.data.success) {
                     setQuestionVotes(questionVotes + 1);
+                } else {
+                    alert(response.data.message);
                 }
             })
             .catch((error) => {
@@ -269,6 +271,8 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
             .then((response) => {
                 if (response.data.success) {
                     setQuestionVotes(questionVotes - 1);
+                } else {
+                    alert(response.data.message);
                 }
             })
             .catch((error) => {
@@ -281,12 +285,17 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
 
     const questionAddComment = (e) => {
         if (e.key === "Enter") {
+            const userId = Cookie.get("userid");
+
             axios
-                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`, {
+                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/users/${userId}/comments`, {
                     text: newComment,
                     author: Cookie.get("auth"),
                 })
                 .then((response) => {
+                    if (!response.data.success) {
+                        alert(response.data.message);
+                    }
                     console.log(response.data);
                     setNewCommentCounter(newCommentCounter + 1);
                 })
@@ -523,19 +532,6 @@ function Comment({ commentId, commentText, commentAuthor, commentVotes, register
             });
     }
 
-    function handleCommentDownvote() {
-        axios
-            .put(`http://localhost:8000/api/comments/${commentId}/users/${userId}/downvote`)
-            .then((response) => {
-                if (response.data.success) {
-                    setVotes(votes - 1);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
     return (
         <div style={{ display: "flex", flexDirection: "row", marginTop: "20px" }}>
             <div>
@@ -548,13 +544,13 @@ function Comment({ commentId, commentText, commentAuthor, commentVotes, register
                         ></UpvoteButton>
                     )}
                     <div className="questionVotes">{votes} votes</div>
-                    {registeredUser && (
+                    {/* {registeredUser && (
                         <DownvoteButton
                             handleDownvote={() => {
                                 handleCommentDownvote(commentId);
                             }}
                         ></DownvoteButton>
-                    )}
+                    )} */}
                 </div>
             </div>
             <div className="commentBox">
@@ -665,12 +661,20 @@ function Answer({
 
     const answerAddComment = (e) => {
         if (e.key === "Enter") {
+            const userId = Cookie.get("userid");
+
             axios
-                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/comments`, {
-                    text: newComment,
-                    author: Cookie.get("auth"),
-                })
-                .then(() => {
+                .post(
+                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/users/${userId}/comments`,
+                    {
+                        text: newComment,
+                        author: Cookie.get("auth"),
+                    }
+                )
+                .then((response) => {
+                    if (!response.data.success) {
+                        alert(response.data.message);
+                    }
                     setNewCommentCounter(newCommentCounter + 1);
                 })
                 .catch((error) => {
@@ -691,6 +695,8 @@ function Answer({
             .then((response) => {
                 if (response.data.success) {
                     setVotes(votes + 1);
+                } else {
+                    alert(response.data.message);
                 }
             })
             .catch((error) => {
@@ -706,6 +712,8 @@ function Answer({
             .then((response) => {
                 if (response.data.success) {
                     setVotes(votes - 1);
+                } else {
+                    alert(response.data.message);
                 }
             })
             .catch((error) => {

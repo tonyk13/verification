@@ -9,7 +9,7 @@ router.post("/questions/:_id/answers", answersController.answer_create_post);
 router.get("/questions/:_id/answers", answersController.answer_list);
 
 // POST request for adding a comment to an answer.
-router.post("/questions/:questionId/answers/:answerId/comments", answersController.answer_add_comment);
+router.post("/questions/:questionId/answers/:answerId/users/:userId/comments", answersController.answer_add_comment);
 
 // GET request for a specific answer.
 router.get("/questions/:questionId/answers/:answerId", answersController.get_answer);

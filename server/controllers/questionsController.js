@@ -48,11 +48,29 @@ exports.question_upvote = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (user.reputation < 50) {
+            return res.json({ message: "Error: User's reputation is too low to vote (below 50)", success: false });
+        }
+
+        const questionId = req.params.questionId;
+
+        const question = await questionModel.findById(questionId);
+
+        if (!question) {
+            return res.status(404).json({ message: "Question not found" });
+        }
+
+        correspondingUser = question.asked_by;
+        console.log("Corresponding user: ", correspondingUser);
+
+        const correspondingUserInModel = await usersModel.findOne({ username: correspondingUser });
+        console.log("Corresponding user in model: ", correspondingUserInModel);
+
         const upvotedQuestionsInUser = user.upvotedQuestions;
         const containsGivenIdInUpvotedQuestions = upvotedQuestionsInUser.includes(req.params.questionId);
 
         if (containsGivenIdInUpvotedQuestions) {
-            return res.json({ message: "User has already upvoted this question", success: false });
+            return res.json({ message: "Error: User has already upvoted this question", success: false });
         }
 
         const downvotedQuestionsInUser = user.downvotedQuestions;
@@ -75,6 +93,14 @@ exports.question_upvote = async (req, res, next) => {
                 return res.status(404).json({ message: "Question not found" });
             }
 
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: 10 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
+
             return res.json({ success: true });
         } else {
             await usersModel.findByIdAndUpdate(
@@ -93,6 +119,14 @@ exports.question_upvote = async (req, res, next) => {
                 return res.status(404).json({ message: "Question not found" });
             }
 
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: 5 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
+
             return res.json({ success: true });
         }
     } catch (error) {
@@ -110,11 +144,27 @@ exports.question_downvote = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (user.reputation < 50) {
+            return res.json({ message: "Error: User's reputation is too low to vote (below 50)", success: false });
+        }
+
+        const questionId = req.params.questionId;
+
+        const question = await questionModel.findById(questionId);
+
+        if (!question) {
+            return res.status(404).json({ message: "Question not found" });
+        }
+
+        correspondingUser = question.asked_by;
+
+        const correspondingUserInModel = await usersModel.findOne({ username: correspondingUser });
+
         const downvotedQuestionsInUser = user.downvotedQuestions;
         const containsGivenIdInDownvotedQuestions = downvotedQuestionsInUser.includes(req.params.questionId);
 
         if (containsGivenIdInDownvotedQuestions) {
-            return res.json({ message: "User has already downvoted this question", success: false });
+            return res.json({ message: "Error: User has already downvoted this question", success: false });
         }
 
         const upvotedQuestionsInUser = user.upvotedQuestions;
@@ -137,6 +187,14 @@ exports.question_downvote = async (req, res, next) => {
                 return res.status(404).json({ message: "Question not found" });
             }
 
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: -5 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
+
             return res.json({ success: true });
         } else {
             await usersModel.findByIdAndUpdate(
@@ -154,6 +212,14 @@ exports.question_downvote = async (req, res, next) => {
             if (!question) {
                 return res.status(404).json({ message: "Question not found" });
             }
+
+            await usersModel.findByIdAndUpdate(
+                correspondingUserInModel._id,
+                { $inc: { reputation: -10 } },
+                { new: true }
+            );
+
+            console.log("Corresponding user's new reputation: ", correspondingUserInModel.reputation);
 
             return res.json({ success: true });
         }
@@ -200,9 +266,28 @@ exports.getQuestionComments = async (req, res) => {
 
 exports.question_add_comment = async (req, res, next) => {
     try {
+        const userId = req.params.userId;
+
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.reputation < 50) {
+            return res.json({
+                message: "Error: User's reputation is too low to add a comment (below 50)",
+                success: false,
+            });
+        }
+
+        if (req.body.text.length > 140) {
+            return res.json({ message: "Error: Comment must be less than 140 characters", success: false });
+        }
+
         const comment = new commentsModel(req.body);
 
-        const question = await questionModel.findById(req.params._id).exec();
+        const question = await questionModel.findById(req.params.questionId).exec();
 
         if (!question) {
             return res.status(404).json({ message: "Question not found" });
