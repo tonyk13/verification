@@ -108,14 +108,15 @@ function App() {
    
     
     useEffect(() => {
+        console.log(searchTrigger)
         const searchbar = document.getElementById('searchbar');
         if (searchbar && searchTrigger!=="") {
             searchbar.addEventListener('input', (event) => {
             });
             searchbar.value="["+searchTrigger+"]"
             setCurrentPage("questionsPage")
-        }
-        setSearchTrigger("")
+        } 
+        setSearchTrigger("");
     }, [searchTrigger]);
 
 
@@ -135,8 +136,9 @@ function App() {
                     isGuest={isGuest}
                 />
             );
-        } else if (currentPage === "tagsPage") {
-            document.getElementById('searchbar').value="";
+        }  
+        document.getElementById('searchbar').value="";
+        if (currentPage === "tagsPage") {
             return (
                 <TagsPage
                     questions={questions}
@@ -196,6 +198,7 @@ function App() {
                     <Sidebar 
                         currentPage={currentPage} 
                         setCurrentPage={setCurrentPage} 
+                        setSearchTrigger={setSearchTrigger}
                     />
                     <div className="content">{renderCurrentPage()}</div>
                 </div>

@@ -463,7 +463,8 @@ function QuestionsPage({
 
     useEffect(() => {
         const searchbar = document.getElementById("searchbar");
-        if (searchbar !== "") {
+        console.log(searchbar.value)
+        if (searchbar.value !== "") {
           const searchValue = searchbar.value;
           setSearch(searchValue);
         }
@@ -471,7 +472,6 @@ function QuestionsPage({
 
 
     useEffect(() => {
-        
         if (currentSearch !== "") {
             parseSearch(currentSearch);
             searchResultsQuestionArrayRef.current = keywordTagArraysToSearchArray(
