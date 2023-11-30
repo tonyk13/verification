@@ -8,6 +8,7 @@ import AskQuestionPage from "./components/AskQuestionPage/AskQuestionPage.js";
 import NewAnswerPage from "./components/NewAnswerPage/NewAnswerPage.js";
 import WelcomePage from "./components/WelcomePage/WelcomePage.js";
 import UserProfilePage from "./components/UserProfilePage/UserProfilePage.js";
+import SingleTagPage from "./components/SingleTagPage/SingleTagPage.js";
 import axios from "axios";
 import Cookie from "js-cookie";
 
@@ -106,23 +107,17 @@ function App() {
     };
 
    
-    
+     
     useEffect(() => {
-        console.log(searchTrigger)
-        const searchbar = document.getElementById('searchbar');
-        if (searchbar && searchTrigger!=="") {
-            searchbar.addEventListener('input', (event) => {
-            });
-            searchbar.value="["+searchTrigger+"]"
-            setCurrentPage("questionsPage")
-        } 
-        setSearchTrigger("");
-    }, [searchTrigger]);
-
-
-
+      if(searchTrigger!==""){
+        setCurrentPage("singleTagPage")
+      }
+      console.log(searchTrigger)
+    }, []);
+     
 
     const renderCurrentPage = () => {
+        //setSearchTrigger("");
         if (currentPage === "questionsPage") {
             return (
                 <QuestionsPage
@@ -136,9 +131,7 @@ function App() {
                     isGuest={isGuest}
                 />
             );
-        }  
-        document.getElementById('searchbar').value="";
-        if (currentPage === "tagsPage") {
+        } else if (currentPage === "tagsPage") {
             return (
                 <TagsPage
                     questions={questions}
@@ -183,7 +176,19 @@ function App() {
                     isGuest={isGuest}
                 />
             );
-        }
+        } else if (currentPage === "singleTagPage") {
+            return (
+                <SingleTagPage
+                    questions={questions}
+                    setCurrentPage={setCurrentPage}
+                    setSelectedQuestion={setSelectedQuestion}
+                    tags={tags}
+                    databaseUpdateTrigger={databaseUpdateTrigger}
+                    isGuest={isGuest}
+                    tagWord={searchTrigger}
+                />
+            );
+        } 
     };
 
     return (

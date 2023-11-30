@@ -462,16 +462,6 @@ function QuestionsPage({
     const searchResultsQuestionArrayRef = useRef([]);
 
     useEffect(() => {
-        const searchbar = document.getElementById("searchbar");
-        console.log(searchbar.value)
-        if (searchbar.value !== "") {
-          const searchValue = searchbar.value;
-          setSearch(searchValue);
-        }
-      }, []);
-
-
-    useEffect(() => {
         if (currentSearch !== "") {
             parseSearch(currentSearch);
             searchResultsQuestionArrayRef.current = keywordTagArraysToSearchArray(
@@ -587,7 +577,7 @@ function QuestionsPage({
                 </div>
 
                 <div id="qphRow2">
-                    <div id="numberOfQuestions">{noq} questions</div>
+                    <div id="numberOfQuestions">{noq} {noq === 1 ? "Question" : "Questions"}</div>
                     <div id="questionsStatusButtons">
                         <button onClick={displayAllQuestions}>Newest</button>
                         <button onClick={displayActiveQuestions}>Active</button>

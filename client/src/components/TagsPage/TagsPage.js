@@ -103,6 +103,7 @@ function TagsContainer({
     
     const handleTagClick = (tagName) => {
         setSearchTrigger(tagName)
+        setCurrentPage("singleTagPage")
     };
 
     return (
