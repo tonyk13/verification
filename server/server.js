@@ -7,10 +7,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const app = express();
 const port = 8000;
+
 const answersRoutes = require("./routes/answersRoutes");
 const tagsRoutes = require("./routes/tagsRoutes");
 const questionsRoutes = require("./routes/questionsRoutes");
 const authRoutes = require("./routes/authRoutes");
+const commentsRoutes = require("./routes/commentsRoutes");
+
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 
@@ -61,6 +64,7 @@ app.use("/api", answersRoutes);
 app.use("/api", tagsRoutes);
 app.use("/api", questionsRoutes);
 app.use("/api", authRoutes);
+app.use("/api", commentsRoutes);
 
 // When the server is terminated using CTRL + C, disconnect the database
 process.on("SIGINT", () => {

@@ -248,12 +248,17 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
         return { __html: textWithLinks };
     }
 
+    const userId = Cookie.get("userid");
+
     function handleQuestionUpvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/upvote`)
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/users/${userId}/upvote`)
             .then((response) => {
-                const updatedQuestion = response.data;
-                setQuestionVotes(updatedQuestion.votes);
+                if (response.data.success) {
+                    setQuestionVotes(questionVotes + 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -262,10 +267,13 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
 
     function handleQuestionDownvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/downvote`)
+            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/users/${userId}/downvote`)
             .then((response) => {
-                const updatedQuestion = response.data;
-                setQuestionVotes(updatedQuestion.votes);
+                if (response.data.success) {
+                    setQuestionVotes(questionVotes - 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -277,12 +285,17 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
 
     const questionAddComment = (e) => {
         if (e.key === "Enter") {
+            const userId = Cookie.get("userid");
+
             axios
-                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`, {
+                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/users/${userId}/comments`, {
                     text: newComment,
                     author: Cookie.get("auth"),
                 })
                 .then((response) => {
+                    if (!response.data.success) {
+                        alert(response.data.message);
+                    }
                     console.log(response.data);
                     setNewCommentCounter(newCommentCounter + 1);
                 })
@@ -303,7 +316,7 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
             }
         };
         getQuestion();
-    });
+    }, []);
 
     return (
         <div id="questionWrapper">
@@ -335,6 +348,7 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
                         <QuestionCommentsWrapper
                             selectedQuestion={selectedQuestion}
                             newCommentCounter={newCommentCounter}
+                            setNewCommentCounter={setNewCommentCounter}
                             registeredUser={registeredUser}
                         />
                     )}
@@ -365,6 +379,7 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter, register
                 .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`)
                 .then((response) => {
                     setComments(Object.values(response.data));
+                    console.log("re-rendering question's comments...");
                 })
                 .catch((error) => {
                     console.error(error);
@@ -394,6 +409,12 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter, register
         }
     };
 
+    useEffect(() => {
+        const endIndex = startIndex + 3;
+        const slicedComments = comments.slice(startIndex, endIndex);
+        setDisplayedComments(slicedComments);
+    }, [comments, startIndex]);
+
     return (
         <div class="commentsWrapper">
             {comments.length > 0 && (
@@ -408,8 +429,6 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter, register
                 {displayedComments.map((comment) => (
                     <Comment
                         key={comment._id}
-                        commentType={"question"}
-                        selectedQuestion={selectedQuestion}
                         commentId={comment._id}
                         commentText={comment.text}
                         commentAuthor={comment.author}
@@ -491,72 +510,28 @@ function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter, re
     );
 }
 
-function Comment({
-    commentType,
-    answer,
-    selectedQuestion,
-    commentId,
-    commentText,
-    commentAuthor,
-    commentVotes,
-    registeredUser,
-}) {
+function Comment({ commentId, commentText, commentAuthor, commentVotes, registeredUser }) {
     const [votes, setVotes] = useState(commentVotes);
+
+    const userId = Cookie.get("userid");
 
     useEffect(() => {
         setVotes(commentVotes);
     }, [commentVotes]);
 
-    function handleCommentUpvote(commentId) {
-        if (commentType === "question") {
-            axios
-                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/upvote`)
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        } else if (commentType === "answer") {
-            axios
-                .put(
-                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/upvote`
-                )
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        }
-    }
-
-    function handleCommentDownvote(commentId) {
-        if (commentType === "question") {
-            axios
-                .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments/${commentId}/downvote`)
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        } else if (commentType === "answer") {
-            axios
-                .put(
-                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments/${commentId}/downvote`
-                )
-                .then((response) => {
-                    const updatedComment = response.data;
-                    setVotes(updatedComment.votes);
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-        }
+    function handleCommentUpvote() {
+        axios
+            .put(`http://localhost:8000/api/comments/${commentId}/users/${userId}/upvote`)
+            .then((response) => {
+                if (response.data.success) {
+                    setVotes(votes + 1);
+                } else {
+                    alert(response.data.message);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
     return (
@@ -564,12 +539,20 @@ function Comment({
             <div>
                 <div className="votesBox">
                     {registeredUser && (
-                        <UpvoteButton handleUpvote={() => handleCommentUpvote(commentId)}></UpvoteButton>
+                        <UpvoteButton
+                            handleUpvote={() => {
+                                handleCommentUpvote(commentId);
+                            }}
+                        ></UpvoteButton>
                     )}
                     <div className="questionVotes">{votes} votes</div>
-                    {registeredUser && (
-                        <DownvoteButton handleDownvote={() => handleCommentDownvote(commentId)}></DownvoteButton>
-                    )}
+                    {/* {registeredUser && (
+                        <DownvoteButton
+                            handleDownvote={() => {
+                                handleCommentDownvote(commentId);
+                            }}
+                        ></DownvoteButton>
+                    )} */}
                 </div>
             </div>
             <div className="commentBox">
@@ -680,12 +663,20 @@ function Answer({
 
     const answerAddComment = (e) => {
         if (e.key === "Enter") {
+            const userId = Cookie.get("userid");
+
             axios
-                .post(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/comments`, {
-                    text: newComment,
-                    author: Cookie.get("auth"),
-                })
-                .then(() => {
+                .post(
+                    `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/users/${userId}/comments`,
+                    {
+                        text: newComment,
+                        author: Cookie.get("auth"),
+                    }
+                )
+                .then((response) => {
+                    if (!response.data.success) {
+                        alert(response.data.message);
+                    }
                     setNewCommentCounter(newCommentCounter + 1);
                 })
                 .catch((error) => {
@@ -696,12 +687,19 @@ function Answer({
         }
     };
 
+    const userId = Cookie.get("userid");
+
     function handleAnswerUpvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/upvote`)
+            .put(
+                `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/users/${userId}/upvote`
+            )
             .then((response) => {
-                const updatedAnswer = response.data;
-                setVotes(updatedAnswer.votes);
+                if (response.data.success) {
+                    setVotes(votes + 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -710,10 +708,15 @@ function Answer({
 
     function handleAnswerDownvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/downvote`)
+            .put(
+                `http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answerKey}/users/${userId}/downvote`
+            )
             .then((response) => {
-                const updatedAnswer = response.data;
-                setVotes(updatedAnswer.votes);
+                if (response.data.success) {
+                    setVotes(votes - 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
