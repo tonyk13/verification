@@ -32,6 +32,12 @@ var userSchema = new Schema({
             ref: "questionModel",
         },
     ],
+    tags : [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "tagsModel",
+        },
+    ],
     answers: [
         {
             type: Schema.Types.ObjectId,
