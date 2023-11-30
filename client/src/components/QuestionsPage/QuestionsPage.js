@@ -63,7 +63,7 @@ function QuestionBox({
     }
 
     return (
-        <div class="questionBox">
+        <div class="questionBox" key={questions._id}>
             {isGuest ? (
                         <div className="votesBox">
                             <div id="voteError">*</div>
@@ -94,7 +94,8 @@ function QuestionBox({
                 <div class="questionTags">
                     {qTagArray.map((tid) => (
                         <p class="qTag">{tidToTagName(tid)}</p>
-                    ))}
+                    ))
+                    }
                 </div>
             </div>
             <div class="askedData">
