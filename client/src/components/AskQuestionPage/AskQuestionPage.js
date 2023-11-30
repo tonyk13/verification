@@ -94,6 +94,8 @@ export default function AskQuestionPage({
     
     async function checkQuestionTags(tagStringArray) {
         let returnArray = [];
+        let uniqueTags = [...new Set(tagStringArray)];
+        tagStringArray = uniqueTags;
         for (const newTag of tagStringArray) {
             let addNewTag = true;
             for (const tag of tagsArray) {

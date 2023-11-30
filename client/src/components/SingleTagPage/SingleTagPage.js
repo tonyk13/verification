@@ -226,7 +226,7 @@ function renderTagResults(
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
-            questions={questions}
+            questions={question}
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}

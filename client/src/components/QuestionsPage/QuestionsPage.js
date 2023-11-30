@@ -23,7 +23,6 @@ function QuestionBox({
         const tag = tagsArray.find((tag) => tag._id === tid);
         return tag ? tag.name : "";
     };
-    
     const [questionVotes, setQuestionVotes] = useState(questions.votes);
     useEffect(() => {
         if (questions) {
@@ -331,7 +330,7 @@ function renderUnansweredQuestions(
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
-            questions={questions}
+            questions={question}
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
@@ -365,7 +364,7 @@ function renderSearchResults(
             qTagArray={question.tags}
             askedByName={question.asked_by}
             askedByTime={`asked ${formatDate(question.ask_date_time)}`}
-            questions={questions}
+            questions={question}
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
