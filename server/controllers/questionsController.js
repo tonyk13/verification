@@ -1,5 +1,6 @@
 const questionModel = require("../models/questions");
 const commentsModel = require("../models/comments");
+const usersModel = require("../models/users");
 
 exports.questions_list = async (req, res, next) => {
     try {
@@ -39,29 +40,125 @@ exports.question_get = async (req, res, next) => {
 
 exports.question_upvote = async (req, res, next) => {
     try {
-        const question = await questionModel.findByIdAndUpdate(req.params._id, { $inc: { votes: 1 } }, { new: true });
+        const userId = req.params.userId;
 
-        if (!question) {
-            return res.status(404).json({ message: "Question not found" });
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(question);
+        const upvotedQuestionsInUser = user.upvotedQuestions;
+        const containsGivenIdInUpvotedQuestions = upvotedQuestionsInUser.includes(req.params.questionId);
+
+        if (containsGivenIdInUpvotedQuestions) {
+            return res.json({ message: "User has already upvoted this question", success: false });
+        }
+
+        const downvotedQuestionsInUser = user.downvotedQuestions;
+        const containsGivenIdInDownvotedQuestions = downvotedQuestionsInUser.includes(req.params.questionId);
+
+        if (containsGivenIdInDownvotedQuestions) {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $pull: { downvotedQuestions: req.params.questionId } },
+                { new: true }
+            );
+
+            const question = await questionModel.findByIdAndUpdate(
+                req.params.questionId,
+                { $inc: { votes: 1 } },
+                { new: true }
+            );
+
+            if (!question) {
+                return res.status(404).json({ message: "Question not found" });
+            }
+
+            return res.json({ success: true });
+        } else {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $addToSet: { upvotedQuestions: req.params.questionId } },
+                { new: true }
+            );
+
+            const question = await questionModel.findByIdAndUpdate(
+                req.params.questionId,
+                { $inc: { votes: 1 } },
+                { new: true }
+            );
+
+            if (!question) {
+                return res.status(404).json({ message: "Question not found" });
+            }
+
+            return res.json({ success: true });
+        }
     } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json(error.message);
     }
 };
 
 exports.question_downvote = async (req, res, next) => {
     try {
-        const question = await questionModel.findByIdAndUpdate(req.params._id, { $inc: { votes: -1 } }, { new: true });
+        const userId = req.params.userId;
 
-        if (!question) {
-            return res.status(404).json({ message: "Question not found" });
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(question);
+        const downvotedQuestionsInUser = user.downvotedQuestions;
+        const containsGivenIdInDownvotedQuestions = downvotedQuestionsInUser.includes(req.params.questionId);
+
+        if (containsGivenIdInDownvotedQuestions) {
+            return res.json({ message: "User has already downvoted this question", success: false });
+        }
+
+        const upvotedQuestionsInUser = user.upvotedQuestions;
+        const containsGivenIdInUpvotedQuestions = upvotedQuestionsInUser.includes(req.params.questionId);
+
+        if (containsGivenIdInUpvotedQuestions) {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $pull: { upvotedQuestions: req.params.questionId } },
+                { new: true }
+            );
+
+            const question = await questionModel.findByIdAndUpdate(
+                req.params.questionId,
+                { $inc: { votes: -1 } },
+                { new: true }
+            );
+
+            if (!question) {
+                return res.status(404).json({ message: "Question not found" });
+            }
+
+            return res.json({ success: true });
+        } else {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $addToSet: { downvotedQuestions: req.params.questionId } },
+                { new: true }
+            );
+
+            const question = await questionModel.findByIdAndUpdate(
+                req.params.questionId,
+                { $inc: { votes: -1 } },
+                { new: true }
+            );
+
+            if (!question) {
+                return res.status(404).json({ message: "Question not found" });
+            }
+
+            return res.json({ success: true });
+        }
     } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json(error.message);
     }
 };
 

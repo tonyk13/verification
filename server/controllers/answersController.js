@@ -1,6 +1,7 @@
 const answersModel = require("../models/answers");
 const questionsModel = require("../models/questions");
 const commentsModel = require("../models/comments");
+const usersModel = require("../models/users");
 
 // Display list of answers for a specific question.
 exports.answer_list = async (req, res, next) => {
@@ -102,33 +103,125 @@ exports.get_answer_comments = async (req, res, next) => {
 // PUT upvote an answer
 exports.answer_upvote = async (req, res, next) => {
     try {
-        const answer = await answersModel.findByIdAndUpdate(req.params.answerId, { $inc: { votes: 1 } }, { new: true });
+        const userId = req.params.userId;
 
-        if (!answer) {
-            return res.status(404).json({ message: "Answer not found" });
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(answer);
+        const upvotedAnswersInUser = user.upvotedAnswers;
+        const containsGivenIdInUpvotedAnswers = upvotedAnswersInUser.includes(req.params.answerId);
+
+        if (containsGivenIdInUpvotedAnswers) {
+            return res.json({ message: "User has already upvoted this answer", success: false });
+        }
+
+        const downvotedAnswersInUser = user.downvotedAnswers;
+        const containsGivenIdInDownvotedAnswers = downvotedAnswersInUser.includes(req.params.answerId);
+
+        if (containsGivenIdInDownvotedAnswers) {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $pull: { downvotedAnswers: req.params.answerId } },
+                { new: true }
+            );
+
+            const answer = await answersModel.findByIdAndUpdate(
+                req.params.answerId,
+                { $inc: { votes: 1 } },
+                { new: true }
+            );
+
+            if (!answer) {
+                return res.status(404).json({ message: "Answer not found" });
+            }
+
+            return res.json({ success: true });
+        } else {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $addToSet: { upvotedAnswers: req.params.answerId } },
+                { new: true }
+            );
+
+            const answer = await answersModel.findByIdAndUpdate(
+                req.params.answerId,
+                { $inc: { votes: 1 } },
+                { new: true }
+            );
+
+            if (!answer) {
+                return res.status(404).json({ message: "Answer not found" });
+            }
+
+            return res.json({ success: true });
+        }
     } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json(error.message);
     }
 };
 
 // PUT downvote an answer
 exports.answer_downvote = async (req, res, next) => {
     try {
-        const answer = await answersModel.findByIdAndUpdate(
-            req.params.answerId,
-            { $inc: { votes: -1 } },
-            { new: true }
-        );
+        const userId = req.params.userId;
 
-        if (!answer) {
-            return res.status(404).json({ message: "Answer not found" });
+        const user = await usersModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(answer);
+        const downvotedAnswersInUser = user.downvotedAnswers;
+        const containsGivenIdInDownvotedAnswers = downvotedAnswersInUser.includes(req.params.answerId);
+
+        if (containsGivenIdInDownvotedAnswers) {
+            return res.json({ message: "User has already downvoted this answer", success: false });
+        }
+
+        const upvotedAnswersInUser = user.upvotedAnswers;
+        const containsGivenIdInUpvotedAnswers = upvotedAnswersInUser.includes(req.params.answerId);
+
+        if (containsGivenIdInUpvotedAnswers) {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $pull: { upvotedAnswers: req.params.answerId } },
+                { new: true }
+            );
+
+            const answer = await answersModel.findByIdAndUpdate(
+                req.params.answerId,
+                { $inc: { votes: -1 } },
+                { new: true }
+            );
+
+            if (!answer) {
+                return res.status(404).json({ message: "Answer not found" });
+            }
+
+            return res.json({ success: true });
+        } else {
+            await usersModel.findByIdAndUpdate(
+                userId,
+                { $addToSet: { downvotedAnswers: req.params.answerId } },
+                { new: true }
+            );
+
+            const answer = await answersModel.findByIdAndUpdate(
+                req.params.answerId,
+                { $inc: { votes: -1 } },
+                { new: true }
+            );
+
+            if (!answer) {
+                return res.status(404).json({ message: "Answer not found" });
+            }
+
+            return res.json({ success: true });
+        }
     } catch (error) {
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json(error.message);
     }
 };

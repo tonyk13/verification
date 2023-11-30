@@ -18,9 +18,9 @@ router.get("/questions/:questionId/answers/:answerId", answersController.get_ans
 router.get("/questions/:questionId/answers/:answerId/comments", answersController.get_answer_comments);
 
 // PUT request for upvoting an answer.
-router.put("/questions/:_id/answers/:answerId/upvote", answersController.answer_upvote);
+router.put("/questions/:questionid/answers/:answerId/users/:userId/upvote", answersController.answer_upvote);
 
 // PUT request for downvoting an answer.
-router.put("/questions/:_id/answers/:answerId/downvote", answersController.answer_downvote);
+router.put("/questions/:questionid/answers/:answerId/users/:userId/downvote", answersController.answer_downvote);
 
 module.exports = router;

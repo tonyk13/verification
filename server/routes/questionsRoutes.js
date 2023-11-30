@@ -12,10 +12,10 @@ router.post("/questions/", questionsController.question_create_post);
 router.get("/questions/:_id", questionsController.question_get);
 
 // PUT request for upvoting a question.
-router.put("/questions/:_id/upvote", questionsController.question_upvote);
+router.put("/questions/:questionId/users/:userId/upvote", questionsController.question_upvote);
 
 // PUT request for downvoting a question.
-router.put("/questions/:_id/downvote", questionsController.question_downvote);
+router.put("/questions/:questionId/users/:userId/downvote", questionsController.question_downvote);
 
 // GET request for a question's number of votes.
 router.get("/questions/:_id/votes", questionsController.getQuestionVotes);

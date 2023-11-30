@@ -39,7 +39,7 @@ exports.upvoteComment = async (req, res, next) => {
                 return res.status(404).json({ message: "Comment not found" });
             }
 
-            res.json(comment);
+            return res.json({ success: true });
         } else {
             await usersModel.findByIdAndUpdate(
                 userId,
@@ -57,7 +57,7 @@ exports.upvoteComment = async (req, res, next) => {
                 return res.status(404).json({ message: "Comment not found" });
             }
 
-            res.json(comment);
+            return res.json({ success: true });
         }
     } catch (error) {
         return res.status(500).json(error.message);
@@ -95,7 +95,7 @@ exports.downvoteComment = async (req, res, next) => {
                 return res.status(404).json({ message: "Comment not found" });
             }
 
-            res.json(comment);
+            return res.json({ success: true });
         } else {
             const downvotedCommentsInUser = user.downvotedComments;
             const containsGivenIdInDownvotedComments = downvotedCommentsInUser.includes(req.params.commentId);
@@ -120,7 +120,7 @@ exports.downvoteComment = async (req, res, next) => {
                 return res.status(404).json({ message: "Comment not found" });
             }
 
-            res.json(comment);
+            return res.json({ success: true });
         }
     } catch (error) {
         return res.status(500).json(error.message);
