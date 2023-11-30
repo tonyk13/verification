@@ -7,6 +7,8 @@ import { AnswersPage } from "./components/AnswersPage/AnswersPage.js";
 import AskQuestionPage from "./components/AskQuestionPage/AskQuestionPage.js";
 import NewAnswerPage from "./components/NewAnswerPage/NewAnswerPage.js";
 import WelcomePage from "./components/WelcomePage/WelcomePage.js";
+import UserProfilePage from "./components/UserProfilePage/UserProfilePage.js";
+import SingleTagPage from "./components/SingleTagPage/SingleTagPage.js";
 import axios from "axios";
 import Cookie from "js-cookie";
 
@@ -17,10 +19,10 @@ function App() {
     const [questions, setQuestions] = useState([]);
     const [tags, setTags] = useState([]);
     const [databaseUpdateTrigger, setDataBaseUpdateTrigger] = useState(0);
-    const [tagClicked, setTagClicked] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isGuest, setIsGuest] = useState(false);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [searchTrigger, setSearchTrigger] = useState("");
 
     useEffect(() => {
         const handleOnline = () => {
@@ -104,7 +106,18 @@ function App() {
         }
     };
 
+   
+     
+    useEffect(() => {
+      if(searchTrigger!==""){
+        setCurrentPage("singleTagPage")
+      }
+      console.log(searchTrigger)
+    }, []);
+     
+
     const renderCurrentPage = () => {
+        //setSearchTrigger("");
         if (currentPage === "questionsPage") {
             return (
                 <QuestionsPage
@@ -115,8 +128,6 @@ function App() {
                     setSearch={setSearch}
                     tags={tags}
                     databaseUpdateTrigger={databaseUpdateTrigger}
-                    tagClicked={tagClicked}
-                    setTagClicked={setTagClicked}
                     isGuest={isGuest}
                 />
             );
@@ -130,7 +141,7 @@ function App() {
                     setSearch={setSearch}
                     databaseUpdateTrigger={databaseUpdateTrigger}
                     currentPage={currentPage}
-                    setTagClicked={setTagClicked}
+                    setSearchTrigger={setSearchTrigger}
                 />
             );
         } else if (currentPage === "askQuestionPage") {
@@ -159,15 +170,41 @@ function App() {
                     isGuest={isGuest}
                 />
             );
-        }
+        } else if (currentPage === "userProfilePage") {
+            return (
+                <UserProfilePage
+                    isGuest={isGuest}
+                />
+            );
+        } else if (currentPage === "singleTagPage") {
+            return (
+                <SingleTagPage
+                    questions={questions}
+                    setCurrentPage={setCurrentPage}
+                    setSelectedQuestion={setSelectedQuestion}
+                    tags={tags}
+                    databaseUpdateTrigger={databaseUpdateTrigger}
+                    isGuest={isGuest}
+                    tagWord={searchTrigger}
+                />
+            );
+        } 
     };
 
     return (
         <div className="app">
             {isOnline && (isLoggedIn || isGuest) ? (
                 <div className="page">
-                    <Header setSearch={setSearch} handleLogout={handleLogout} isGuest={isGuest} />
-                    <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    <Header 
+                        setSearch={setSearch} 
+                        handleLogout={handleLogout} 
+                        isGuest={isGuest} 
+                    />
+                    <Sidebar 
+                        currentPage={currentPage} 
+                        setCurrentPage={setCurrentPage} 
+                        setSearchTrigger={setSearchTrigger}
+                    />
                     <div className="content">{renderCurrentPage()}</div>
                 </div>
             ) : (

@@ -10,6 +10,10 @@ export default function Sidebar({ currentPage, setCurrentPage }) {
         setCurrentPage("tagsPage");
     };
 
+    const loadUserProfilePage = () => {
+        setCurrentPage("userProfilePage");
+    };
+
     return (
         <div className="sidebar">
             <div className="sidebarButtons">
@@ -28,6 +32,14 @@ export default function Sidebar({ currentPage, setCurrentPage }) {
                     onClick={loadTagsPage}
                 >
                     Tags
+                </button>
+                <button
+                    type="button"
+                    className="sidebarButton"
+                    id="userProfileButton"
+                    onClick={loadUserProfilePage}
+                >
+                    User Profile
                 </button>
             </div>
         </div>
