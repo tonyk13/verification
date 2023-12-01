@@ -136,56 +136,52 @@ module.exports.getUserReputation = async (req, res) => {
 };
 
 module.exports.getUserDateCreated = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const userDateCreated = response.createdAt;
     return res.json({ userDateCreated });
 };
 
 module.exports.postQuestiontoUser = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     try {
-      const responseUser = await User.findById(objectIdString);
-      if (!responseUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      responseUser.questions.push(req.body._id);
-      await responseUser.save();
-      return res.status(200).json({ message: 'Post Question to User Succesful' });
+        const responseUser = await User.findById(objectIdString);
+        if (!responseUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        responseUser.questions.push(req.body._id);
+        await responseUser.save();
+        return res.status(200).json({ message: "Post Question to User Succesful" });
     } catch (error) {
-      return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
 module.exports.getUserQuestions = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
-    const userQuestions = response.questions
+    const userQuestions = response.questions;
     return res.json({ userQuestions });
-
 };
 
 module.exports.postTagtoUser = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     try {
-      const responseUser = await User.findById(objectIdString);
-      if (!responseUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }     
-      responseUser.tags.push(req.body._id);
-      await responseUser.save();
-      return res.status(200).json({ message: 'Post Tags to User Succesful' });
+        const responseUser = await User.findById(objectIdString);
+        if (!responseUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        responseUser.tags.push(req.body._id);
+        await responseUser.save();
+        return res.status(200).json({ message: "Post Tags to User Succesful" });
     } catch (error) {
-      return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
 module.exports.getUserTags = async (req, res) => {
-    const objectIdString = req.params._id; 
+    const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
-    const userTags = response.tags
+    const userTags = response.tags;
     return res.json({ userTags });
 };
-
-
-
