@@ -174,6 +174,9 @@ function App() {
             return (
                 <UserProfilePage
                     isGuest={isGuest}
+                    setCurrentPage={setCurrentPage}
+                    setSearchTrigger={setSearchTrigger}
+                    
                 />
             );
         } else if (currentPage === "singleTagPage") {

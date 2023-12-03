@@ -3,7 +3,304 @@ import Cookie from "js-cookie";
 import axios from "axios";
 import "./UserProfilePage.css";
 
-export default function UserProfilePage({ isGuest }) { 
+
+
+
+/*
+//QuestionBox
+function QuestionBox({
+    answerViewCount,
+    questionTitle,
+    questionSummary,
+    qTagArray,
+    askedByName,
+    askedByTime,
+    setCurrentPage,
+    setSelectedQuestion,
+    questions,
+    tagsArray,
+    questionsArray,
+    isGuest
+}) {
+    const tidToTagName = (tid) => {
+        const tag = tagsArray.find((tag) => tag._id === tid);
+        return tag ? tag.name : "";
+    };
+    const [questionVotes, setQuestionVotes] = useState(questions.votes);
+    useEffect(() => {
+        if (questions) {
+            axios
+                .get(`http://localhost:8000/api/questions/${questions._id}/votes`)
+                .then((response) => {
+                    setQuestionVotes(response.data.votes);
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    });
+
+    function handleQuestionUpvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${questions._id}/upvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    function handleQuestionDownvote() {
+        axios
+            .put(`http://localhost:8000/api/questions/${questions._id}/downvote`)
+            .then((response) => {
+                const updatedQuestion = response.data;
+                setQuestionVotes(updatedQuestion.votes);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
+    return (
+        <div class="questionBox" key={questions._id}>
+            {isGuest ? (
+                        <div className="votesBox">
+                            <div id="voteError">*</div>
+                            <div className="questionVotes">{questionVotes} votes</div>
+                        </div>
+                    ) : (
+                        <div className="votesBox">
+                            {<UpvoteButton handleUpvote={handleQuestionUpvote}></UpvoteButton>}
+                            <div className="questionVotes">{questionVotes} votes</div>
+                            {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
+                        </div>
+            )}
+            <div class="titleTagWrapper">
+                <p
+                    class="questionTitle"
+                    onClick={() => {
+                        const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
+                        setSelectedQuestion(selectedQuestion);
+                        selectedQuestion.views += 1;
+                        setCurrentPage("answersPage");
+                    }}
+                >
+                    {questionTitle}
+                </p>
+                <p class="questionSummary">
+                    {questionSummary}
+                </p>
+                <div class="questionTags">
+                    {qTagArray.map((tid) => (
+                        <p class="qTag">{tidToTagName(tid)}</p>
+                    ))
+                    }
+                </div>
+            </div>
+            <div class="askedData">
+                <p class="askedByName">{askedByName}</p>
+                <p class="askedByTime">{askedByTime}</p>
+            </div>
+            <p class="answerViewCount">{answerViewCount}</p>
+        </div>
+    );
+}
+ 
+function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber) {
+    const questionPageSize = 5;
+    let startIndex = (questionPageNumber - 1) * questionPageSize;
+    let endIndex = startIndex + questionPageSize;
+    if (startIndex > questions.length) {
+        startIndex = 0;
+        endIndex = 4;
+        setQuestionPageNumber(1);
+    }
+    if (endIndex > questions.length) {
+        endIndex = questions.length;
+    }
+    let questionsBasedOnPageNumber = [...questions].slice(startIndex, endIndex);
+    return questionsBasedOnPageNumber;
+}
+//All Questions
+function renderUserQuestions(
+    questions,
+    setCurrentPage,
+    setSelectedQuestion,
+    tagsArray,
+    questionPageNumber,
+    setQuestionPageNumber,
+    isGuest
+) {
+    questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
+    let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
+        questions,
+        questionPageNumber,
+        setQuestionPageNumber
+    );
+
+    return questionsBasedOnPageNumber.map((question) => (
+        <QuestionBox
+            key={question.id}
+            answerViewCount={`${question.answers.length} answers ${question.views} views`}
+            questionTitle={question.title}
+            questionSummary={question.summary}
+            qTagArray={question.tags}
+            askedByName={question.asked_by}
+            askedByTime={`asked ${formatDate(question.ask_date_time)}`}
+            questions={question}
+            setCurrentPage={setCurrentPage}
+            setSelectedQuestion={setSelectedQuestion}
+            tagsArray={tagsArray}
+            questionsArray={questions}
+            isGuest={isGuest}
+        />
+    ));
+}
+*/
+
+//USERS QUESTIONS CONTENT
+function UserQuestionBox( {qid} ) {
+
+    return (
+        <div>{qid}</div>        
+    )
+
+
+}
+function renderUserQuestions( 
+    userQuestions 
+){
+    return userQuestions.map((question) => (
+        <UserQuestionBox 
+            qid={question}
+        />
+    ));
+
+}
+
+
+//USERS TAG CONTENT
+function TagBox({ 
+    tid,
+    setCurrentPage,
+    setSearchTrigger,
+    tagsAndCounts,
+    tagsAndEditable
+}) {
+    const [tagData, setTagData] = useState('');
+    //alert
+
+    useEffect(() => {
+        async function getTagData(tid) {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/tags/${tid}`);
+                setTagData(response.data);
+            } catch (error) {
+                console.error('Error fetching tag data:', error);
+            }
+        }
+
+        getTagData(tid);
+    }, []);
+
+    const handleTagClick = (tagName) => {
+        setSearchTrigger(tagName)
+        setCurrentPage("singleTagPage")
+    };
+    
+
+
+    //EDITING FUNCTIONALITY
+
+    const [tagEditing, setTagEditing] = useState(false);
+    const [editedTagName, setEditedTagName] = useState('');
+    const handleTagEditClick = () => {
+        if(!tagsAndEditable[tid]) {
+            window.alert('This tag cannot be edited since it is being used by other users')
+        } else {
+            setTagEditing(true);
+            setEditedTagName(tagData.name);
+        }
+    }
+
+
+    const handleInputChange = (e) => {
+        setEditedTagName(e.target.value);
+    };
+
+    const handleSaveEdit = () => {
+        //insert axios
+        setTagEditing(false);
+    };
+
+    const handleTagDeleteClick = () => {
+        if(!tagsAndEditable[tid]) {
+            window.alert('This tag cannot be deleted since it is being used by other users')
+        }
+         //insert axios
+        
+    }
+
+    return (
+        <div  className="tag">
+            <div className="tagName">
+                {tagEditing ? (
+                        <input
+                            type="text"
+                            value={editedTagName}
+                            onChange={handleInputChange}
+                        />
+                    ) : (
+                        <span onClick={() => handleTagClick(tagData.name)}>
+                            {tagData.name}
+                        </span>
+                    )}
+                <div
+                    className="questionCount"
+                    style={{ color: "black" }}
+                >
+                    {tagsAndCounts[tid] === 1
+                        ? `${tagsAndCounts[tid]} question`
+                        : `${tagsAndCounts[tid]} questions`}
+                </div>
+                <button onClick={tagEditing ? handleSaveEdit : handleTagEditClick}>
+                    {tagEditing ? 'Save' : 'Edit'}
+                </button>
+                <button onClick={handleTagDeleteClick}>
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function renderUserTags(
+    userTags,
+    setCurrentPage,
+    setSearchTrigger,
+    tagsAndCounts,
+    tagsAndEditable
+) {
+    return userTags.map((tag) => (
+        <TagBox 
+            key={tag} 
+            tid={tag}
+            setCurrentPage={setCurrentPage}
+            setSearchTrigger={setSearchTrigger}
+            tagsAndCounts={tagsAndCounts}
+            tagsAndEditable={tagsAndEditable}
+        />
+    ));
+}
+
+export default function UserProfilePage({ 
+    isGuest, 
+    setCurrentPage,
+    setSearchTrigger
+}) { 
 
 /****
 -Menu
@@ -25,11 +322,17 @@ export default function UserProfilePage({ isGuest }) {
 
 --User Profile Admin
     */
-
-//GUEST USER
     const [userReputation, setUserReputation] = useState('');
     const [username, setUsername] = useState('');
     const [userDateCreated, setUserDateCreated] = useState('');
+    const [userQuestions, setUserQuestions] = useState('');
+    const [userTags, setUserTags] = useState('');
+    const [userAnswers, setUserAnswers] = useState('');
+    const [questions, setQuestions] = useState('');
+
+
+
+    //USER DATA
     useEffect(() => {
         if (!isGuest) {
             async function fetchData() {
@@ -56,8 +359,20 @@ export default function UserProfilePage({ isGuest }) {
                 }
 
                 try {
-                    const userQuestions = await axios.get(`http://localhost:8000/api/getUserQuestions/${userid}`);
-                    console.log(userQuestions)
+                    const responseUserQuestions = await axios.get(`http://localhost:8000/api/getUserQuestions/${userid}`);
+                    setUserQuestions(responseUserQuestions.data.userQuestions)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const userTags = await axios.get(`http://localhost:8000/api/getUserTags/${userid}`);
+                    setUserTags(userTags.data.userTags)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const allQuestions = await axios.get(`http://localhost:8000/api/questions/`);
+                    setQuestions(allQuestions.data)
                 } catch (error) {
                     console.error('Error fetching user questions:', error);
                 }
@@ -144,6 +459,42 @@ export default function UserProfilePage({ isGuest }) {
             return `${secondsString} seconds`;
         }
     }
+    const tagsAndCounts = {};
+    const tagsAndEditable = {};
+    
+    for (const ut of userTags) {
+        tagsAndEditable[ut] = true; // Initialize editable value for each tag to true
+    
+        for (const q of questions) {
+            for (const qt of q.tags) {
+                if (ut === qt) {
+                    tagsAndCounts[ut] = (tagsAndCounts[ut] || 0) + 1;
+                    if (q.asked_by !== username) {
+                        tagsAndEditable[ut] = false; 
+                    }
+                }
+            }
+        }
+    }
+
+    const [userDisplay, setUserDisplay] = useState("userQuestions");
+    
+    
+    //Display Users Questions
+    const displayUserQuestions = () => { 
+        setUserDisplay("userQuestions");
+    }
+
+    const displayUserTags = () => { 
+        setUserDisplay("userTags");
+    } 
+    
+    const displayUserAnswers = () => { 
+        setUserDisplay("userAnswers");
+    }
+
+
+
 
     return (
         <div id="userProfilePage">
@@ -172,27 +523,73 @@ export default function UserProfilePage({ isGuest }) {
                                     </div> 
                             </div>
                             <div id="upphRow3">
-                                Member for: 
+                                Joined: 
                                 <div class="userData">
                                     {formatDate(userDateCreated)}
                                 </div> 
                             </div>
                             <div id="upphRow4">
                                 <div id="userProfileStatusButtons">
-                                    <button>My Questions</button>
-                                    <button>My Tags</button>
-                                    <button>My Answers</button>
+                                    <button onClick={displayUserQuestions}>
+                                        My Questions
+                                    </button>
+                                    <button onClick={displayUserTags}>
+                                        My Tags
+                                    </button>
+                                    <button onClick={displayUserAnswers}>
+                                        My Answers
+                                    </button>
                                 </div>
                             </div>
+                            <br />
+                            {userDisplay === "userQuestions" &&
+                                <div>
+                                    My Questions: {userQuestions.length}{" "}
+                                    {userQuestions.length === 1 ? "Question" : "Questions"}
+                                    <br />
+                                    Click on a Question to Modify/Delete
+                                </div>
+
+                            }
+                            {userDisplay === "userTags" &&
+                                <div>
+                                    My Tags: {userTags.length}{" "}
+                                    {userTags.length === 1 ? "Tag" : "Tags"}
+                                    <br />
+                                    Click on a Tag to Modify/Delete
+                                </div>
+                            }
+                              {userDisplay === "userAnswers" &&
+                                <div>
+                                    My Answers
+                                </div>
+                            }
                         </div>
+                        <div id = "userProfileContenerWrapper">
+                            {userDisplay === "userQuestions" && 
+                            userQuestions &&
+                                <div id="userQuestionsContent">
+                                    {renderUserQuestions(
+                                        userQuestions
+                                        )
+                                    }
+                                </div> 
+                            }
+                            {userDisplay === "userTags" &&
+                              userTags &&
+                                <div id="userTagsContent">
+                                    {renderUserTags(
+                                        userTags,
+                                        setCurrentPage,
+                                        setSearchTrigger,
+                                        tagsAndCounts,
+                                        tagsAndEditable
+                                    )}
+                                </div> 
+                            }
 
 
-
-
-
-
-
-
+                        </div>
                     </div>
             )}      
         </div>

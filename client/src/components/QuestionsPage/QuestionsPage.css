@@ -75,7 +75,7 @@
     font-weight:bold;
     top:22.5vh;
     position:fixed;
-    height: calc(100vh - 26vh); /* Calculate the height of the container relative to the viewport */
+    height: calc(100vh - 26vh);
     overflow-y: auto;
     overflow-x: hidden;
     width: 80%;
