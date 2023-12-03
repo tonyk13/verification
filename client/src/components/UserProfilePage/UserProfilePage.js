@@ -108,7 +108,7 @@ function QuestionBox({
         </div>
     );
 }
-
+ 
 function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestionPageNumber) {
     const questionPageSize = 5;
     let startIndex = (questionPageNumber - 1) * questionPageSize;
@@ -161,8 +161,146 @@ function renderUserQuestions(
 }
 */
 
+//USERS QUESTIONS CONTENT
+function UserQuestionBox( {qid} ) {
 
-export default function UserProfilePage({ isGuest }) { 
+    return (
+        <div>{qid}</div>        
+    )
+
+
+}
+function renderUserQuestions( 
+    userQuestions 
+){
+    return userQuestions.map((question) => (
+        <UserQuestionBox 
+            qid={question}
+        />
+    ));
+
+}
+
+
+//USERS TAG CONTENT
+function TagBox({ 
+    tid,
+    setCurrentPage,
+    setSearchTrigger,
+    tagsAndCounts,
+    tagsAndEditable
+}) {
+    const [tagData, setTagData] = useState('');
+    //alert
+
+    useEffect(() => {
+        async function getTagData(tid) {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/tags/${tid}`);
+                setTagData(response.data);
+            } catch (error) {
+                console.error('Error fetching tag data:', error);
+            }
+        }
+
+        getTagData(tid);
+    }, []);
+
+    const handleTagClick = (tagName) => {
+        setSearchTrigger(tagName)
+        setCurrentPage("singleTagPage")
+    };
+    
+
+
+    //EDITING FUNCTIONALITY
+
+    const [tagEditing, setTagEditing] = useState(false);
+    const [editedTagName, setEditedTagName] = useState('');
+    const handleTagEditClick = () => {
+        if(!tagsAndEditable[tid]) {
+            window.alert('This tag cannot be edited since it is being used by other users')
+        } else {
+            setTagEditing(true);
+            setEditedTagName(tagData.name);
+        }
+    }
+
+
+    const handleInputChange = (e) => {
+        setEditedTagName(e.target.value);
+    };
+
+    const handleSaveEdit = () => {
+        //insert axios
+        setTagEditing(false);
+    };
+
+    const handleTagDeleteClick = () => {
+        if(!tagsAndEditable[tid]) {
+            window.alert('This tag cannot be deleted since it is being used by other users')
+        }
+         //insert axios
+        
+    }
+
+    return (
+        <div  className="tag">
+            <div className="tagName">
+                {tagEditing ? (
+                        <input
+                            type="text"
+                            value={editedTagName}
+                            onChange={handleInputChange}
+                        />
+                    ) : (
+                        <span onClick={() => handleTagClick(tagData.name)}>
+                            {tagData.name}
+                        </span>
+                    )}
+                <div
+                    className="questionCount"
+                    style={{ color: "black" }}
+                >
+                    {tagsAndCounts[tid] === 1
+                        ? `${tagsAndCounts[tid]} question`
+                        : `${tagsAndCounts[tid]} questions`}
+                </div>
+                <button onClick={tagEditing ? handleSaveEdit : handleTagEditClick}>
+                    {tagEditing ? 'Save' : 'Edit'}
+                </button>
+                <button onClick={handleTagDeleteClick}>
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function renderUserTags(
+    userTags,
+    setCurrentPage,
+    setSearchTrigger,
+    tagsAndCounts,
+    tagsAndEditable
+) {
+    return userTags.map((tag) => (
+        <TagBox 
+            key={tag} 
+            tid={tag}
+            setCurrentPage={setCurrentPage}
+            setSearchTrigger={setSearchTrigger}
+            tagsAndCounts={tagsAndCounts}
+            tagsAndEditable={tagsAndEditable}
+        />
+    ));
+}
+
+export default function UserProfilePage({ 
+    isGuest, 
+    setCurrentPage,
+    setSearchTrigger
+}) { 
 
 /****
 -Menu
@@ -184,11 +322,17 @@ export default function UserProfilePage({ isGuest }) {
 
 --User Profile Admin
     */
-
-//GUEST USER
     const [userReputation, setUserReputation] = useState('');
     const [username, setUsername] = useState('');
     const [userDateCreated, setUserDateCreated] = useState('');
+    const [userQuestions, setUserQuestions] = useState('');
+    const [userTags, setUserTags] = useState('');
+    const [userAnswers, setUserAnswers] = useState('');
+    const [questions, setQuestions] = useState('');
+
+
+
+    //USER DATA
     useEffect(() => {
         if (!isGuest) {
             async function fetchData() {
@@ -215,8 +359,20 @@ export default function UserProfilePage({ isGuest }) {
                 }
 
                 try {
-                    const userQuestions = await axios.get(`http://localhost:8000/api/getUserQuestions/${userid}`);
-                    console.log(userQuestions)
+                    const responseUserQuestions = await axios.get(`http://localhost:8000/api/getUserQuestions/${userid}`);
+                    setUserQuestions(responseUserQuestions.data.userQuestions)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const userTags = await axios.get(`http://localhost:8000/api/getUserTags/${userid}`);
+                    setUserTags(userTags.data.userTags)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const allQuestions = await axios.get(`http://localhost:8000/api/questions/`);
+                    setQuestions(allQuestions.data)
                 } catch (error) {
                     console.error('Error fetching user questions:', error);
                 }
@@ -303,9 +459,23 @@ export default function UserProfilePage({ isGuest }) {
             return `${secondsString} seconds`;
         }
     }
-
-
-
+    const tagsAndCounts = {};
+    const tagsAndEditable = {};
+    
+    for (const ut of userTags) {
+        tagsAndEditable[ut] = true; // Initialize editable value for each tag to true
+    
+        for (const q of questions) {
+            for (const qt of q.tags) {
+                if (ut === qt) {
+                    tagsAndCounts[ut] = (tagsAndCounts[ut] || 0) + 1;
+                    if (q.asked_by !== username) {
+                        tagsAndEditable[ut] = false; 
+                    }
+                }
+            }
+        }
+    }
 
     const [userDisplay, setUserDisplay] = useState("userQuestions");
     
@@ -313,7 +483,6 @@ export default function UserProfilePage({ isGuest }) {
     //Display Users Questions
     const displayUserQuestions = () => { 
         setUserDisplay("userQuestions");
-        //renderUserQuestions();
     }
 
     const displayUserTags = () => { 
@@ -323,6 +492,8 @@ export default function UserProfilePage({ isGuest }) {
     const displayUserAnswers = () => { 
         setUserDisplay("userAnswers");
     }
+
+
 
 
     return (
@@ -370,18 +541,55 @@ export default function UserProfilePage({ isGuest }) {
                                     </button>
                                 </div>
                             </div>
+                            <br />
+                            {userDisplay === "userQuestions" &&
+                                <div>
+                                    My Questions: {userQuestions.length}{" "}
+                                    {userQuestions.length === 1 ? "Question" : "Questions"}
+                                    <br />
+                                    Click on a Question to Modify/Delete
+                                </div>
+
+                            }
+                            {userDisplay === "userTags" &&
+                                <div>
+                                    My Tags: {userTags.length}{" "}
+                                    {userTags.length === 1 ? "Tag" : "Tags"}
+                                    <br />
+                                    Click on a Tag to Modify/Delete
+                                </div>
+                            }
+                              {userDisplay === "userAnswers" &&
+                                <div>
+                                    My Answers
+                                </div>
+                            }
                         </div>
-                        <div>
-                            {userDisplay}
+                        <div id = "userProfileContenerWrapper">
+                            {userDisplay === "userQuestions" && 
+                            userQuestions &&
+                                <div id="userQuestionsContent">
+                                    {renderUserQuestions(
+                                        userQuestions
+                                        )
+                                    }
+                                </div> 
+                            }
+                            {userDisplay === "userTags" &&
+                              userTags &&
+                                <div id="userTagsContent">
+                                    {renderUserTags(
+                                        userTags,
+                                        setCurrentPage,
+                                        setSearchTrigger,
+                                        tagsAndCounts,
+                                        tagsAndEditable
+                                    )}
+                                </div> 
+                            }
+
+
                         </div>
-
-
-
-
-
-
-
-
                     </div>
             )}      
         </div>
