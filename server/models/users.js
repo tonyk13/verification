@@ -32,7 +32,7 @@ var userSchema = new Schema({
             ref: "questionModel",
         },
     ],
-    tags : [
+    tags: [
         {
             type: Schema.Types.ObjectId,
             ref: "tagsModel",
@@ -100,8 +100,11 @@ userSchema.path("questions").default([]);
 userSchema.path("answers").default([]);
 userSchema.path("comments").default([]);
 
-userSchema.pre("save", async function () {
-    this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+userSchema.pre("save", async function (next) {
+    if (this.isModified("passwordHash")) {
+        this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
+    }
+    next();
 });
 
 module.exports = mongoose.model("userModel", userSchema);
