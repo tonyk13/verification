@@ -9,6 +9,7 @@ import NewAnswerPage from "./components/NewAnswerPage/NewAnswerPage.js";
 import WelcomePage from "./components/WelcomePage/WelcomePage.js";
 import UserProfilePage from "./components/UserProfilePage/UserProfilePage.js";
 import SingleTagPage from "./components/SingleTagPage/SingleTagPage.js";
+import EditQuestionPage from "./components/EditQuestionPage/EditQuestionPage.js";
 import axios from "axios";
 import Cookie from "js-cookie";
 
@@ -176,7 +177,9 @@ function App() {
                     isGuest={isGuest}
                     setCurrentPage={setCurrentPage}
                     setSearchTrigger={setSearchTrigger}
-                    
+                    EditQuestionPage={EditQuestionPage}
+                    setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                    tags={tags}
                 />
             );
         } else if (currentPage === "singleTagPage") {
@@ -191,7 +194,7 @@ function App() {
                     tagWord={searchTrigger}
                 />
             );
-        } 
+        }
     };
 
     return (

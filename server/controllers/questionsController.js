@@ -38,6 +38,40 @@ exports.question_get = async (req, res, next) => {
     }
 };
 
+exports.question_update = async (req, res) => {
+    try {
+      const questionId = req.params._id;
+      const { title, summary, text, tags } = req.body;
+      const updatedQuestion = await questionModel.findByIdAndUpdate(
+        questionId,
+        {  title, summary, text, tags },
+        { new: true }
+      );
+  
+      if (!updatedQuestion) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+  
+      res.json({ message: "Question updated successfully", updatedQuestion });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+exports.question_delete = async (req, res) => {
+    try {
+      const questionId = req.params._id;
+      const deletedQuestion = await questionModel.findByIdAndDelete(questionId);
+      if (!deletedQuestion) {
+        return res.status(404).json({ message: 'Question not found' });
+      }
+      res.json({ message: 'Question deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+};
+  
+
 exports.question_upvote = async (req, res, next) => {
     try {
         const userId = req.params.userId;

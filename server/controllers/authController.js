@@ -164,6 +164,25 @@ module.exports.getUserQuestions = async (req, res) => {
     return res.json({ userQuestions });
 };
 
+module.exports.deleteQuestionFromUser = async (req, res) => {
+    const userId = req.params._id;
+    const questionId = req.params._qid;
+    try {
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $pull: { questions: questionId } },
+        { new: true }
+      );
+      console.log(user);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ message: "Question removed from user successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 module.exports.postTagtoUser = async (req, res) => {
     const objectIdString = req.params._id;
     try {
