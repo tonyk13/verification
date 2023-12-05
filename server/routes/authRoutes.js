@@ -10,8 +10,10 @@ const {
     getUserDateCreated,
     postQuestiontoUser,
     getUserQuestions,
+    deleteQuestionFromUser,
     postTagtoUser,
-    getUserTags
+    getUserTags,
+    deleteTagFromUser
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
@@ -45,10 +47,16 @@ router.post("/postQuestiontoUser/:_id/questions", postQuestiontoUser);
 // GET request for all user's questions
 router.get("/getUserQuestions/:_id", getUserQuestions);
 
+// DELETE request for a user's question
+router.delete("/deleteQuestionFromUser/:_id/questions/:_qid", deleteQuestionFromUser);
+
 // POST request for user's tag (SINGLE).
 router.post("/postTagtoUser/:_id/tags", postTagtoUser);
 
 // GET request for all user's tags
 router.get("/getUserTags/:_id", getUserTags);
+
+// DELETE request for a user's tags
+router.delete("/deleteTagFromUser/:_id/tags/:_tid", deleteTagFromUser);
 
 module.exports = router;

@@ -11,6 +11,12 @@ router.post("/questions/", questionsController.question_create_post);
 // GET request for a question. (this might not be needed)
 router.get("/questions/:_id", questionsController.question_get);
 
+// PUT request for a question
+router.put("/questions/:_id", questionsController.question_update);
+
+// Delete request for a question
+router.delete('/questions/:_id', questionsController.question_delete);
+
 // PUT request for upvoting a question.
 router.put("/questions/:questionId/users/:userId/upvote", questionsController.question_upvote);
 

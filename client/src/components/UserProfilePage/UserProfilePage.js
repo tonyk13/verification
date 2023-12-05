@@ -162,20 +162,101 @@ function renderUserQuestions(
 */
 
 //USERS QUESTIONS CONTENT
-function UserQuestionBox( {qid} ) {
+function UserQuestionBox({ 
+    qid,
+    setCurrentPage,
+    EditQuestionPage,
+    setDataBaseUpdateTrigger,
+    tags,
+    toggleEditQuestionPage,
+    seteqTitle,
+    seteqSummary,
+    seteqText,
+    seteqTags,
+    seteqid
+}) {
+    const [questionData, setQuestionData] = useState('');
+    useEffect (() => {
+        async function getQuestionData(qid) {
+            try {
+                const responseQuestionData = await axios.get(`http://localhost:8000/api/questions/${qid}`);
+                setQuestionData(responseQuestionData.data);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        getQuestionData(qid);
+    }, []);
+
+    async function getQuestionDataTags(qdTag) {
+        try{
+            const qdTagResponse = await axios.get(`http://localhost:8000/api/tags/${qdTag}`);
+            return qdTagResponse.data.name;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+   
+    const handleQuestionClick = async (questionName) => {
+        seteqTitle(questionData.title);
+        seteqSummary(questionData.summary);
+        seteqText(questionData.text);
+        seteqid(qid);
+        const questionDataTagsArray = [];
+        for (const qdTag of questionData.tags) {
+            const tag = getQuestionDataTags(qdTag);
+            questionDataTagsArray.push(tag);
+          }
+        
+          try {
+            const qdTagsArrayResolved = await Promise.all(questionDataTagsArray);
+            seteqTags(qdTagsArrayResolved);
+            toggleEditQuestionPage(true);
+          } catch (error) {
+            console.log(error);
+          }
+    };
+   
 
     return (
-        <div>{qid}</div>        
+        <div class="userQuestionBox" onClick={() => handleQuestionClick(questionData.title)}>
+            <div class="userQuestionTitle">
+                {questionData.title}
+            </div>
+            <div class="userQuestionSummary">
+                {questionData.summary}
+            </div>
+        </div>        
     )
-
-
 }
+
 function renderUserQuestions( 
-    userQuestions 
-){
+    userQuestions,
+    setCurrentPage,
+    EditQuestionPage,
+    setDataBaseUpdateTrigger,
+    tags,
+    toggleEditQuestionPage,
+    seteqTitle,
+    seteqSummary,
+    seteqText,
+    seteqTags,
+    seteqid
+) {
     return userQuestions.map((question) => (
-        <UserQuestionBox 
+        <UserQuestionBox
+            key={question} 
             qid={question}
+            setCurrentPage={setCurrentPage}
+            EditQuestionPage={EditQuestionPage}
+            setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+            tags={tags}
+            toggleEditQuestionPage={toggleEditQuestionPage}
+            seteqTitle={seteqTitle}
+            seteqSummary={seteqSummary}
+            seteqText={seteqText}
+            seteqTags={seteqTags}
+            seteqid={seteqid}
         />
     ));
 
@@ -188,11 +269,14 @@ function TagBox({
     setCurrentPage,
     setSearchTrigger,
     tagsAndCounts,
-    tagsAndEditable
+    tagsAndEditable,
+    setDataBaseUpdateTrigger,
+    userTags,
+    setUserTags,
+    setUserDisplay
 }) {
     const [tagData, setTagData] = useState('');
-    //alert
-
+    const [editedTagName, setEditedTagName] = useState('');
     useEffect(() => {
         async function getTagData(tid) {
             try {
@@ -211,12 +295,21 @@ function TagBox({
         setCurrentPage("singleTagPage")
     };
     
+    const handleUpdateTrigger = async () => {
+        return new Promise((resolve) => {
+        setDataBaseUpdateTrigger((prev) => {
+            setTimeout(() => {
+            resolve(); // Resolve the promise after the timeout
+            }, 1000);
+            return prev + 1;
+        });
+        });
+    };
 
 
     //EDITING FUNCTIONALITY
-
     const [tagEditing, setTagEditing] = useState(false);
-    const [editedTagName, setEditedTagName] = useState('');
+    
     const handleTagEditClick = () => {
         if(!tagsAndEditable[tid]) {
             window.alert('This tag cannot be edited since it is being used by other users')
@@ -226,22 +319,43 @@ function TagBox({
         }
     }
 
-
     const handleInputChange = (e) => {
-        setEditedTagName(e.target.value);
+        const inputValue = e.target.value;
+        const tagNameNoBlank = inputValue.replace(/\s/g, '');
+        const tagNameTrimmedAndNoBlank = tagNameNoBlank.slice(0, 10);
+        setEditedTagName(tagNameTrimmedAndNoBlank);
+      };
+
+    const handleSaveEdit = async () => {
+        try {
+          const ptResponse = await axios.put(`http://localhost:8000/api/tags/${tid}`, { name: editedTagName }, {
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          await handleUpdateTrigger();
+          setTagEditing(false);       
+          setUserDisplay("userQuestions");   
+        } catch (error) {
+          console.error('Error updating tag:', error);
+        }
     };
 
-    const handleSaveEdit = () => {
-        //insert axios
-        setTagEditing(false);
-    };
-
-    const handleTagDeleteClick = () => {
+    const handleTagDeleteClick = async() => {
         if(!tagsAndEditable[tid]) {
             window.alert('This tag cannot be deleted since it is being used by other users')
         }
-         //insert axios
-        
+        try{
+            const userid = Cookie.get("userid");
+            const tdResponse = await axios.delete(`http://localhost:8000/api/tags/${tid}`);
+            const pqDeletTagFromUser = await axios.delete(`http://localhost:8000/api/deleteTagFromUser/${userid}/tags/${tid}`);
+        } catch (error) {
+            console.error('Error deleting tag:', error);
+        }
+        let tempUserTags = userTags;
+        tempUserTags = tempUserTags.filter(tag => tag !== tid);
+        setUserTags(tempUserTags)
+        await handleUpdateTrigger();
     }
 
     return (
@@ -255,16 +369,20 @@ function TagBox({
                         />
                     ) : (
                         <span onClick={() => handleTagClick(tagData.name)}>
-                            {tagData.name}
+                            {editedTagName !== '' ? editedTagName : tagData.name}
                         </span>
                     )}
                 <div
                     className="questionCount"
                     style={{ color: "black" }}
                 >
-                    {tagsAndCounts[tid] === 1
+                 {tagsAndCounts[tid] !== undefined ? (
+                    tagsAndCounts[tid] === 1
                         ? `${tagsAndCounts[tid]} question`
-                        : `${tagsAndCounts[tid]} questions`}
+                        : `${tagsAndCounts[tid]} questions`
+                    ) : (
+                        "0 questions"
+                    )}
                 </div>
                 <button onClick={tagEditing ? handleSaveEdit : handleTagEditClick}>
                     {tagEditing ? 'Save' : 'Edit'}
@@ -282,7 +400,10 @@ function renderUserTags(
     setCurrentPage,
     setSearchTrigger,
     tagsAndCounts,
-    tagsAndEditable
+    tagsAndEditable,
+    setDataBaseUpdateTrigger,
+    setUserTags,
+    setUserDisplay
 ) {
     return userTags.map((tag) => (
         <TagBox 
@@ -292,6 +413,10 @@ function renderUserTags(
             setSearchTrigger={setSearchTrigger}
             tagsAndCounts={tagsAndCounts}
             tagsAndEditable={tagsAndEditable}
+            setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+            userTags={userTags}
+            setUserTags={setUserTags}
+            setUserDisplay={setUserDisplay}
         />
     ));
 }
@@ -299,7 +424,10 @@ function renderUserTags(
 export default function UserProfilePage({ 
     isGuest, 
     setCurrentPage,
-    setSearchTrigger
+    setSearchTrigger,
+    EditQuestionPage,
+    setDataBaseUpdateTrigger,
+    tags
 }) { 
 
 /****
@@ -463,7 +591,7 @@ export default function UserProfilePage({
     const tagsAndEditable = {};
     
     for (const ut of userTags) {
-        tagsAndEditable[ut] = true; // Initialize editable value for each tag to true
+        tagsAndEditable[ut] = true; 
     
         for (const q of questions) {
             for (const qt of q.tags) {
@@ -477,8 +605,16 @@ export default function UserProfilePage({
         }
     }
 
-    const [userDisplay, setUserDisplay] = useState("userQuestions");
+    //Edit Question Page Functionality
+    const [editQuestionPage, toggleEditQuestionPage] = useState(false);
+    const [eqTitle, seteqTitle] = useState('');
+    const [eqSummary, seteqSummary] = useState('');    
+    const [eqText, seteqText] = useState('');    
+    const [eqTags, seteqTags] = useState('');
+    const [eqid, seteqid] = useState('');
     
+
+    const [userDisplay, setUserDisplay] = useState("userQuestions");
     
     //Display Users Questions
     const displayUserQuestions = () => { 
@@ -492,108 +628,135 @@ export default function UserProfilePage({
     const displayUserAnswers = () => { 
         setUserDisplay("userAnswers");
     }
-
-
+    //Render Trigger
+   /* useEffect(() => {
+        console.log("render Trigger")
+    }, [userTags]);
+    */
 
 
     return (
         <div id="userProfilePage">
-            {isGuest ? (
-                        <div id="userProfilePageHeader">
-                            <div id="mustBeLoggedInText">
-                                <div id="mustBeLoggedInText">
-                                    *Must Be Logged In to Access User Profile Page
-                                </div> 
-                                
-                            </div>
-                        </div>
-                    ) : (
-                    <div>
-                        <div id="userProfilePageHeader">
-                            <div id="upphRow1">
-                                User:
-                                <div class="userData">
-                                    {username}
-                                </div> 
-                            </div>
-                            <div id="upphRow2">
-                                Reputation:
-                                <div class="userData">
-                                    {userReputation}
-                                    </div> 
-                            </div>
-                            <div id="upphRow3">
-                                Joined: 
-                                <div class="userData">
-                                    {formatDate(userDateCreated)}
-                                </div> 
-                            </div>
-                            <div id="upphRow4">
-                                <div id="userProfileStatusButtons">
-                                    <button onClick={displayUserQuestions}>
-                                        My Questions
-                                    </button>
-                                    <button onClick={displayUserTags}>
-                                        My Tags
-                                    </button>
-                                    <button onClick={displayUserAnswers}>
-                                        My Answers
-                                    </button>
-                                </div>
-                            </div>
-                            <br />
-                            {userDisplay === "userQuestions" &&
-                                <div>
-                                    My Questions: {userQuestions.length}{" "}
-                                    {userQuestions.length === 1 ? "Question" : "Questions"}
-                                    <br />
-                                    Click on a Question to Modify/Delete
-                                </div>
-
-                            }
-                            {userDisplay === "userTags" &&
-                                <div>
-                                    My Tags: {userTags.length}{" "}
-                                    {userTags.length === 1 ? "Tag" : "Tags"}
-                                    <br />
-                                    Click on a Tag to Modify/Delete
-                                </div>
-                            }
-                              {userDisplay === "userAnswers" &&
-                                <div>
-                                    My Answers
-                                </div>
-                            }
-                        </div>
-                        <div id = "userProfileContenerWrapper">
-                            {userDisplay === "userQuestions" && 
-                            userQuestions &&
-                                <div id="userQuestionsContent">
-                                    {renderUserQuestions(
-                                        userQuestions
-                                        )
-                                    }
-                                </div> 
-                            }
-                            {userDisplay === "userTags" &&
-                              userTags &&
-                                <div id="userTagsContent">
-                                    {renderUserTags(
-                                        userTags,
-                                        setCurrentPage,
-                                        setSearchTrigger,
-                                        tagsAndCounts,
-                                        tagsAndEditable
-                                    )}
-                                </div> 
-                            }
-
-
-                        </div>
+          {isGuest ? (
+            <div id="userProfilePageHeader">
+              <div id="mustBeLoggedInText">
+                *Must Be Logged In to Access User Profile Page
+              </div>
+            </div>
+          ) : (
+            <div>
+              {editQuestionPage ? (
+                <div> 
+                    <EditQuestionPage
+                          setCurrentPage={setCurrentPage}
+                          setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                          tags={tags}
+                          eqTitle={eqTitle}
+                          eqSummary={eqSummary}
+                          eqText={eqText}
+                          eqTags={eqTags}
+                          eqid={eqid}
+                          toggleEditQuestionPage={toggleEditQuestionPage}
+                    />
+                </div>
+              ) : (
+                <div>
+                  <div id="userProfilePageHeader">
+                    <div id="upphRow1">
+                      User:
+                      <div className="userData">
+                        {username}
+                      </div>
                     </div>
-            )}      
+                    <div id="upphRow2">
+                      Reputation:
+                      <div className="userData">
+                        {userReputation}
+                      </div>
+                    </div>
+                    <div id="upphRow3">
+                      Joined:
+                      <div className="userData">
+                        {formatDate(userDateCreated)}
+                      </div>
+                    </div>
+                    <div id="upphRow4">
+                      <div id="userProfileStatusButtons">
+                        <button onClick={displayUserQuestions}>
+                          My Questions
+                        </button>
+                        <button onClick={displayUserTags}>
+                          My Tags
+                        </button>
+                        <button onClick={displayUserAnswers}>
+                          My Answers
+                        </button>
+                      </div>
+                    </div>
+                    <br />
+                    {userDisplay === "userQuestions" && (
+                      <div>
+                        My Questions: {userQuestions.length}{" "}
+                        {userQuestions.length === 1 ? "Question" : "Questions"}
+                        <br />
+                        Click on a Question to Modify/Delete
+                      </div>
+                    )}
+      
+                    {userDisplay === "userTags" && (
+                      <div>
+                        My Tags: {userTags.length}{" "}
+                        {userTags.length === 1 ? "Tag" : "Tags"}
+                        <br />
+                        Click on a Tag to Modify/Delete
+                      </div>
+                    )}
+      
+                    {userDisplay === "userAnswers" && (
+                      <div>
+                        My Answers
+                      </div>
+                    )}
+                  </div>
+                  <div id="userProfileContentWrapper">
+                    {userDisplay === "userQuestions" && userQuestions && (
+                      <div id="userQuestionsContent">
+                        {renderUserQuestions(
+                          userQuestions,
+                          setCurrentPage,
+                          EditQuestionPage,
+                          setDataBaseUpdateTrigger,
+                          tags,
+                          toggleEditQuestionPage,
+                          seteqTitle,
+                          seteqSummary,
+                          seteqText,
+                          seteqTags,
+                          seteqid
+                        )}
+                      </div>
+                    )}
+                    {userDisplay === "userTags" && userTags && (
+                      <div id="userTagsContent">
+                        {renderUserTags(
+                          userTags,
+                          setCurrentPage,
+                          setSearchTrigger,
+                          tagsAndCounts,
+                          tagsAndEditable,
+                          setDataBaseUpdateTrigger,
+                          setUserTags,
+                          setUserDisplay
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-    );
+      );
 }
 
 
