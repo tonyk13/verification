@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./NewAnswerPage.css";
+import Cookie from "js-cookie";
 
 export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
-    const [username, setUsername] = useState("");
     const [answer, setAnswer] = useState("");
     const [error, setError] = useState("");
-
-    function handleUsernameChange(e) {
-        setUsername(e.target.value);
-    }
 
     function handleAnswerChange(e) {
         setAnswer(e.target.value);
@@ -37,8 +33,8 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        if (!username || !answer) {
-            setError("Both fields are mandatory");
+        if (!answer) {
+            setError("Answer field is required");
             return;
         }
 
@@ -48,12 +44,19 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
         }
 
         try {
+            const user = Cookie.get("auth");
             const response = await axios.post(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers`, {
                 text: answer,
-                ans_by: username,
+                ans_by: user,
             });
 
-            selectedQuestion = response.data.updatedQuestion; // do something similar when you add a comment to an answer
+            const userId = Cookie.get("userid");
+            await axios.post(`http://localhost:8000/api/postAnswerToUser/${userId}/answers`, {
+                text: answer,
+                ans_by: user,
+            });
+
+            selectedQuestion = response.data.updatedQuestion;
 
             setCurrentPage("answersPage");
         } catch (error) {
@@ -65,10 +68,6 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
     return (
         <div id="answerQuestionPage">
             <form onSubmit={handleSubmit}>
-                <div className="answerQuestionLabels">
-                    <label htmlFor="username">Username*</label>
-                    <input type="text" id="username" value={username} onChange={handleUsernameChange} />
-                </div>
                 <div className="answerQuestionLabels">
                     <label htmlFor="answerText">Answer Text*</label>
                     <textarea value={answer} onChange={handleAnswerChange} id="answerQuestionTextDiv" />

@@ -13,7 +13,8 @@ const {
     deleteQuestionFromUser,
     postTagtoUser,
     getUserTags,
-    deleteTagFromUser
+    deleteTagFromUser,
+    postAnswerToUser,
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
@@ -58,5 +59,8 @@ router.get("/getUserTags/:_id", getUserTags);
 
 // DELETE request for a user's tags
 router.delete("/deleteTagFromUser/:_id/tags/:_tid", deleteTagFromUser);
+
+// POST request to add an answer to a user's answers
+router.post("/postAnswerToUser/:userId/answers", postAnswerToUser);
 
 module.exports = router;
