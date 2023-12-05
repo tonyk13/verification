@@ -11,4 +11,10 @@ router.post("/tags/", tagsController.tags_post);
 // GET request for a tag. (might not need this)
 router.get("/tags/:_id", tagsController.tag_get);
 
+//PUT request for a tag
+router.put("/tags/:_id", tagsController.tag_put);
+
+//DELETE request for a tag
+router.delete("/tags/:_id", tagsController.tag_delete);
+
 module.exports = router;

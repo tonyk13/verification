@@ -269,10 +269,14 @@ function TagBox({
     setCurrentPage,
     setSearchTrigger,
     tagsAndCounts,
-    tagsAndEditable
+    tagsAndEditable,
+    setDataBaseUpdateTrigger,
+    userTags,
+    setUserTags,
+    setUserDisplay
 }) {
     const [tagData, setTagData] = useState('');
-
+    const [editedTagName, setEditedTagName] = useState('');
     useEffect(() => {
         async function getTagData(tid) {
             try {
@@ -291,12 +295,21 @@ function TagBox({
         setCurrentPage("singleTagPage")
     };
     
+    const handleUpdateTrigger = async () => {
+        return new Promise((resolve) => {
+        setDataBaseUpdateTrigger((prev) => {
+            setTimeout(() => {
+            resolve(); // Resolve the promise after the timeout
+            }, 1000);
+            return prev + 1;
+        });
+        });
+    };
 
 
     //EDITING FUNCTIONALITY
-
     const [tagEditing, setTagEditing] = useState(false);
-    const [editedTagName, setEditedTagName] = useState('');
+    
     const handleTagEditClick = () => {
         if(!tagsAndEditable[tid]) {
             window.alert('This tag cannot be edited since it is being used by other users')
@@ -307,20 +320,42 @@ function TagBox({
     }
 
     const handleInputChange = (e) => {
-        setEditedTagName(e.target.value);
+        const inputValue = e.target.value;
+        const tagNameNoBlank = inputValue.replace(/\s/g, '');
+        const tagNameTrimmedAndNoBlank = tagNameNoBlank.slice(0, 10);
+        setEditedTagName(tagNameTrimmedAndNoBlank);
+      };
+
+    const handleSaveEdit = async () => {
+        try {
+          const ptResponse = await axios.put(`http://localhost:8000/api/tags/${tid}`, { name: editedTagName }, {
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          await handleUpdateTrigger();
+          setTagEditing(false);       
+          setUserDisplay("userQuestions");   
+        } catch (error) {
+          console.error('Error updating tag:', error);
+        }
     };
 
-    const handleSaveEdit = () => {
-        //insert axios
-        setTagEditing(false);
-    };
-
-    const handleTagDeleteClick = () => {
+    const handleTagDeleteClick = async() => {
         if(!tagsAndEditable[tid]) {
             window.alert('This tag cannot be deleted since it is being used by other users')
         }
-         //insert axios
-        
+        try{
+            const userid = Cookie.get("userid");
+            const tdResponse = await axios.delete(`http://localhost:8000/api/tags/${tid}`);
+            const pqDeletTagFromUser = await axios.delete(`http://localhost:8000/api/deleteTagFromUser/${userid}/tags/${tid}`);
+        } catch (error) {
+            console.error('Error deleting tag:', error);
+        }
+        let tempUserTags = userTags;
+        tempUserTags = tempUserTags.filter(tag => tag !== tid);
+        setUserTags(tempUserTags)
+        await handleUpdateTrigger();
     }
 
     return (
@@ -334,16 +369,20 @@ function TagBox({
                         />
                     ) : (
                         <span onClick={() => handleTagClick(tagData.name)}>
-                            {tagData.name}
+                            {editedTagName !== '' ? editedTagName : tagData.name}
                         </span>
                     )}
                 <div
                     className="questionCount"
                     style={{ color: "black" }}
                 >
-                    {tagsAndCounts[tid] === 1
+                 {tagsAndCounts[tid] !== undefined ? (
+                    tagsAndCounts[tid] === 1
                         ? `${tagsAndCounts[tid]} question`
-                        : `${tagsAndCounts[tid]} questions`}
+                        : `${tagsAndCounts[tid]} questions`
+                    ) : (
+                        "0 questions"
+                    )}
                 </div>
                 <button onClick={tagEditing ? handleSaveEdit : handleTagEditClick}>
                     {tagEditing ? 'Save' : 'Edit'}
@@ -361,7 +400,10 @@ function renderUserTags(
     setCurrentPage,
     setSearchTrigger,
     tagsAndCounts,
-    tagsAndEditable
+    tagsAndEditable,
+    setDataBaseUpdateTrigger,
+    setUserTags,
+    setUserDisplay
 ) {
     return userTags.map((tag) => (
         <TagBox 
@@ -371,6 +413,10 @@ function renderUserTags(
             setSearchTrigger={setSearchTrigger}
             tagsAndCounts={tagsAndCounts}
             tagsAndEditable={tagsAndEditable}
+            setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+            userTags={userTags}
+            setUserTags={setUserTags}
+            setUserDisplay={setUserDisplay}
         />
     ));
 }
@@ -582,6 +628,12 @@ export default function UserProfilePage({
     const displayUserAnswers = () => { 
         setUserDisplay("userAnswers");
     }
+    //Render Trigger
+   /* useEffect(() => {
+        console.log("render Trigger")
+    }, [userTags]);
+    */
+
 
     return (
         <div id="userProfilePage">
@@ -691,7 +743,10 @@ export default function UserProfilePage({
                           setCurrentPage,
                           setSearchTrigger,
                           tagsAndCounts,
-                          tagsAndEditable
+                          tagsAndEditable,
+                          setDataBaseUpdateTrigger,
+                          setUserTags,
+                          setUserDisplay
                         )}
                       </div>
                     )}

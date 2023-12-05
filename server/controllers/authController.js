@@ -204,3 +204,22 @@ module.exports.getUserTags = async (req, res) => {
     const userTags = response.tags;
     return res.json({ userTags });
 };
+
+module.exports.deleteTagFromUser = async (req, res) => {
+    const userId = req.params._id;
+    const tagId = req.params._tid;
+    try {
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $pull: { tags: tagId } },
+        { new: true }
+      );
+      console.log(user);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ message: "Question removed from user successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+};
