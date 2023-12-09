@@ -15,6 +15,7 @@ const {
     getUserTags,
     deleteTagFromUser,
     postAnswerToUser,
+    getUserAnswers,
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
@@ -62,5 +63,8 @@ router.delete("/deleteTagFromUser/:_id/tags/:_tid", deleteTagFromUser);
 
 // POST request to add an answer to a user's answers
 router.post("/postAnswerToUser/:userId/answers", postAnswerToUser);
+
+// GET request for all user's answers
+router.get("/getUserAnswers/:_id", getUserAnswers);
 
 module.exports = router;

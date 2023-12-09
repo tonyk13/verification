@@ -221,18 +221,25 @@ module.exports.postAnswerToUser = async (req, res) => {
     const userId = req.params.userId;
     try {
         const user = await User.findById(userId);
+        const ansId = req.body._id;
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        const answer = new answersModel(req.body);
 
-        user.answers.push(answer);
-
+        await User.findOneAndUpdate({ _id: userId }, { $pull: { answers: ansId } }, { new: true });
         await user.save();
 
         return res.status(200).json({ message: "Post Answer to User Successful" });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error" });
     }
+};
+
+
+module.exports.getUserAnswers = async (req, res) => {
+    const objectIdString = req.params._id;
+    const response = await User.findById(objectIdString);
+    const userAnswers = response.answers;
+    return res.json({ userAnswers });
 };

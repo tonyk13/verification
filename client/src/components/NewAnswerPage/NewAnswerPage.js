@@ -50,10 +50,10 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
                 ans_by: user,
             });
 
+    
             const userId = Cookie.get("userid");
             await axios.post(`http://localhost:8000/api/postAnswerToUser/${userId}/answers`, {
-                text: answer,
-                ans_by: user,
+                _id: response.data._id
             });
 
             selectedQuestion = response.data.updatedQuestion;
