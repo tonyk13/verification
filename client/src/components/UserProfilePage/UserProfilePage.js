@@ -421,6 +421,21 @@ function renderUserTags(
     ));
 }
 
+//USERS ANSWERS CONTENT
+function renderUserAnswers(
+    userAnswers,
+    questions
+){
+    
+    //Getting questions answered by a user
+    
+   
+}
+
+
+
+
+
 export default function UserProfilePage({ 
     isGuest, 
     setCurrentPage,
@@ -456,7 +471,7 @@ export default function UserProfilePage({
     const [userQuestions, setUserQuestions] = useState('');
     const [userTags, setUserTags] = useState('');
     const [userAnswers, setUserAnswers] = useState('');
-    const [questions, setQuestions] = useState('');
+    const [questions, setQuestions] = useState([]);
 
 
 
@@ -504,10 +519,45 @@ export default function UserProfilePage({
                 } catch (error) {
                     console.error('Error fetching user questions:', error);
                 }
+                try {
+                    const userAnswers = await axios.get(`http://localhost:8000/api/getUserAnswers/${userid}`);
+                    setUserAnswers(userAnswers.data.userAnswers)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
             }
             fetchData();
         }
     }, []);
+
+    const [userAnsweredQuestions, setuserAnsweredQuestions] = useState([])
+    useEffect(() => {
+        let questionAnswerIDS = [];
+        console.log(questions)
+        console.log(userAnswers)
+        for (const question of questions) {
+            for (const answer of question.answers) {
+                console.log(answer)
+                for (const ua of userAnswers) {
+                    console.log(ua)
+                    if (answer._id === ua) {
+                        questionAnswerIDS.push(question._id);
+                        break;
+                    }
+                }
+            }
+        }
+    
+        const uniqueQA = [...new Set(questionAnswerIDS)];
+        setuserAnsweredQuestions(uniqueQA);
+
+    }, [userAnswers]);
+    console.log(userAnsweredQuestions)
+
+
+
+
+
 
     function formatDate(dateString) {
         const time = new Date(dateString);
@@ -708,14 +758,17 @@ export default function UserProfilePage({
                         My Tags: {userTags.length}{" "}
                         {userTags.length === 1 ? "Tag" : "Tags"}
                         <br />
-                        Click on a Tag to Modify/Delete
+                        Click on a Tag to View Questions or Modify/Delete
                       </div>
                     )}
       
                     {userDisplay === "userAnswers" && (
                       <div>
-                        My Answers
-                      </div>
+                      My Answers: {userAnswers.length}{" "}
+                      {userAnswers.length === 1 ? "Answer" : "Answers"}
+                      <br />
+                      Click on a Question to Modify/Delete Your Answer
+                    </div>
                     )}
                   </div>
                   <div id="userProfileContentWrapper">
@@ -747,6 +800,14 @@ export default function UserProfilePage({
                           setDataBaseUpdateTrigger,
                           setUserTags,
                           setUserDisplay
+                        )}
+                      </div>
+                    )}
+                    {userDisplay === "userAnswers" && userAnswers && (
+                      <div id="userAnswersContent">
+                        {renderUserAnswers(
+                            userAnswers,
+                            questions
                         )}
                       </div>
                     )}
