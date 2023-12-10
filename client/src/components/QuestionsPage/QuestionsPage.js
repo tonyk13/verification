@@ -17,7 +17,7 @@ function QuestionBox({
     questions,
     tagsArray,
     questionsArray,
-    isGuest
+    isGuest,
 }) {
     const tidToTagName = (tid) => {
         const tag = tagsArray.find((tag) => tag._id === tid);
@@ -64,16 +64,16 @@ function QuestionBox({
     return (
         <div class="questionBox" key={questions._id}>
             {isGuest ? (
-                        <div className="votesBox">
-                            <div id="voteError">*</div>
-                            <div className="questionVotes">{questionVotes} votes</div>
-                        </div>
-                    ) : (
-                        <div className="votesBox">
-                            {<UpvoteButton handleUpvote={handleQuestionUpvote}></UpvoteButton>}
-                            <div className="questionVotes">{questionVotes} votes</div>
-                            {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
-                        </div>
+                <div className="votesBox">
+                    <div id="voteError">*</div>
+                    <div className="questionVotes">{questionVotes} votes</div>
+                </div>
+            ) : (
+                <div className="votesBox">
+                    {<UpvoteButton handleUpvote={handleQuestionUpvote}></UpvoteButton>}
+                    <div className="questionVotes">{questionVotes} votes</div>
+                    {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
+                </div>
             )}
             <div class="titleTagWrapper">
                 <p
@@ -87,14 +87,11 @@ function QuestionBox({
                 >
                     {questionTitle}
                 </p>
-                <p class="questionSummary">
-                    {questionSummary}
-                </p>
+                <p class="questionSummary">{questionSummary}</p>
                 <div class="questionTags">
                     {qTagArray.map((tid) => (
                         <p class="qTag">{tidToTagName(tid)}</p>
-                    ))
-                    }
+                    ))}
                 </div>
             </div>
             <div class="askedData">
@@ -312,6 +309,8 @@ function renderUnansweredQuestions(
 
     let unansweredQuestions = questions.filter((question) => question.answers.length === 0);
 
+    console.log(unansweredQuestions);
+
     if (unansweredQuestions.length === 0) {
         return "No Questions Found";
     }
@@ -334,6 +333,7 @@ function renderUnansweredQuestions(
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
+            questionsArray={unansweredQuestions}
             isGuest={isGuest}
         />
     ));
@@ -368,6 +368,7 @@ function renderSearchResults(
             setCurrentPage={setCurrentPage}
             setSelectedQuestion={setSelectedQuestion}
             tagsArray={tagsArray}
+            questionsArray={questionsBasedOnPageNumber}
             isGuest={isGuest}
         />
     ));
@@ -577,7 +578,9 @@ function QuestionsPage({
                 </div>
 
                 <div id="qphRow2">
-                    <div id="numberOfQuestions">{noq} {noq === 1 ? "Question" : "Questions"}</div>
+                    <div id="numberOfQuestions">
+                        {noq} {noq === 1 ? "Question" : "Questions"}
+                    </div>
                     <div id="questionsStatusButtons">
                         <button onClick={displayAllQuestions}>Newest</button>
                         <button onClick={displayActiveQuestions}>Active</button>
