@@ -13,7 +13,10 @@ export default function EditQuestionPage({
     eqText,
     eqTags,
     eqid,
-    toggleEditQuestionPage
+    toggleEditQuestionPage,
+    isAdmin,
+    adminViewUser
+
 }) {
     //PQ Title Handler
     const [pqNE1, setpqNE1] = useState(true);
@@ -103,10 +106,12 @@ export default function EditQuestionPage({
     async function checkQuestionTags(tagStringArray, userid) {
         let returnArray = [];
         let uniqueTags = [...new Set(tagStringArray)];
-        tagStringArray = uniqueTags;
+        tagStringArray = uniqueTags.flatMap(innerArray => innerArray);;
+        console.log(tagStringArray)
         for (const newTag of tagStringArray) {
             let addNewTag = true;
             for (const tag of tagsArray) {
+                //console.log(tag.name)
                 if (tag.name === newTag) {
                     addNewTag = false;
                     returnArray.push(tag._id);
@@ -160,7 +165,10 @@ export default function EditQuestionPage({
         event.preventDefault();
         
         if (!pqNE1 && !pqNE2 && !pqHLE1 && !pqNE3 && !pqTE1 && !pqNE4) {
-            const userid = Cookie.get("userid");
+            let userid = Cookie.get("userid");
+            if(isAdmin){
+                userid = adminViewUser
+            }
             let pqTagArray = await checkQuestionTags(pqTagStringArray, userid);
      
             let pqReputation = "";
@@ -217,14 +225,18 @@ export default function EditQuestionPage({
     };
 
     const handleDeleteQuestionButton = async (event) => {
-        const userid = Cookie.get("userid");
+        let userid = Cookie.get("userid");
+        if(isAdmin){
+            userid = adminViewUser
+        }
         try {
             const pqDeleteformUser = await axios.delete(`http://localhost:8000/api/deleteQuestionFromUser/${userid}/questions/${eqid}`);
+            await handleUpdateTrigger();
         } catch (error) {
             console.error('Error:', error);
+        } finally {
+            setCurrentPage("questionsPage");
         }
-        await handleUpdateTrigger();
-        setCurrentPage("questionsPage");
     }
 
     const handleReturnQuestionButton = async (event) => {

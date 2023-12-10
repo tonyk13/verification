@@ -1,6 +1,7 @@
 const questionModel = require("../models/questions");
 const commentsModel = require("../models/comments");
 const answersModel = require("../models/answers");
+const tagsModel = require("../models/tags");
 const usersModel = require("../models/users");
 
 exports.questions_list = async (req, res, next) => {
@@ -43,12 +44,38 @@ exports.question_update = async (req, res) => {
     try {
       const questionId = req.params._id;
       const { title, summary, text, tags } = req.body;
+      const questionBeforeEditing = await questionModel.findById(questionId);
+      const questionTagsBeforeEditing = questionBeforeEditing.tags;
+      const username = questionBeforeEditing.asked_by;
+      const user = await usersModel.findOne({ username: username, questions: questionId });
+      const userId = user._id;
+      
       const updatedQuestion = await questionModel.findByIdAndUpdate(
         questionId,
         {  title, summary, text, tags },
         { new: true }
       );
-  
+
+        //Fix DataBase of edited tags
+        for (const tagId of questionTagsBeforeEditing) {
+            const questionWithTagCheck = await questionModel.findOne({ tags: tagId });
+            if (!questionWithTagCheck) {
+                await tagsModel.findByIdAndDelete(tagId);
+                await usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+            }
+
+            for (const qid of user.questions) {
+                const userQuestionsWithTagsCheck = await questionModel.findOne({
+                    tags: tagId,
+                    asked_by: user.username
+                });
+
+                if (!userQuestionsWithTagsCheck) {
+                    usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+                }
+            }  
+            }
+
       if (!updatedQuestion) {
         return res.status(404).json({ message: "Question not found" });
       }

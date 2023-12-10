@@ -301,7 +301,6 @@ function renderUserAnswers(
 
 //ALL USERS CONTENT (ONLY ADMIN)
 function UserBox({
-    key,
     userid,
     username,
     userReputation,
@@ -724,6 +723,8 @@ export default function UserProfilePage({
                             eqTags={eqTags}
                             eqid={eqid}
                             toggleEditQuestionPage={toggleEditQuestionPage}
+                            isAdmin={isAdmin}
+                            adminViewUser={adminViewUser}
                         />
                     </div>
                 ) : (

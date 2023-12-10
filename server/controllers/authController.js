@@ -255,7 +255,7 @@ module.exports.deleteQuestionFromUser = async (req, res) => {
             }
 
         }
-
+        res.status(200).json({ message: "Deletion successful" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
