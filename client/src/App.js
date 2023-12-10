@@ -107,15 +107,12 @@ function App() {
         }
     };
 
-   
-     
     useEffect(() => {
-      if(searchTrigger!==""){
-        setCurrentPage("singleTagPage")
-      }
-      console.log(searchTrigger)
+        if (searchTrigger !== "") {
+            setCurrentPage("singleTagPage");
+        }
+        console.log(searchTrigger);
     }, []);
-     
 
     const renderCurrentPage = () => {
         //setSearchTrigger("");
@@ -201,15 +198,12 @@ function App() {
         <div className="app">
             {isOnline && (isLoggedIn || isGuest) ? (
                 <div className="page">
-                    <Header 
-                        setSearch={setSearch} 
-                        handleLogout={handleLogout} 
-                        isGuest={isGuest} 
-                    />
-                    <Sidebar 
-                        currentPage={currentPage} 
-                        setCurrentPage={setCurrentPage} 
+                    <Header setSearch={setSearch} handleLogout={handleLogout} isGuest={isGuest} />
+                    <Sidebar
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
                         setSearchTrigger={setSearchTrigger}
+                        setSearch={setSearch}
                     />
                     <div className="content">{renderCurrentPage()}</div>
                 </div>
