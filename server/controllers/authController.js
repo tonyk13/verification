@@ -218,18 +218,17 @@ module.exports.deleteTagFromUser = async (req, res) => {
 };
 
 module.exports.postAnswerToUser = async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.params._id;
     try {
         const user = await User.findById(userId);
         const ansId = req.body._id;
-
+    
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
-        await User.findOneAndUpdate({ _id: userId }, { $pull: { answers: ansId } }, { new: true });
+        user.answers.push(ansId);
         await user.save();
-
+    
         return res.status(200).json({ message: "Post Answer to User Successful" });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error" });

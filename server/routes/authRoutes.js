@@ -62,7 +62,7 @@ router.get("/getUserTags/:_id", getUserTags);
 router.delete("/deleteTagFromUser/:_id/tags/:_tid", deleteTagFromUser);
 
 // POST request to add an answer to a user's answers
-router.post("/postAnswerToUser/:userId/answers", postAnswerToUser);
+router.post("/postAnswerToUser/:_id/answers", postAnswerToUser);
 
 // GET request for all user's answers
 router.get("/getUserAnswers/:_id", getUserAnswers);
