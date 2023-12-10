@@ -87,7 +87,9 @@ function renderUserQuestions(
     seteqid
 ) {
     const upcw = document.getElementById('userProfileContentWrapper');
-    upcw.style.overflow = 'auto';
+    if (upcw) {
+        upcw.style.overflow = 'auto';
+    } 
     return userQuestions.map((question) => (
         <UserQuestionBox
             key={question} 
@@ -251,7 +253,9 @@ function renderUserTags(
     setUserDisplay
 ) {
     const upcw = document.getElementById('userProfileContentWrapper');
-    upcw.style.overflow = 'auto';
+    if (upcw) {
+        upcw.style.overflow = 'auto';
+    } 
     return userTags.map((tag) => (
         <TagBox 
             key={tag} 
@@ -278,7 +282,9 @@ function renderUserAnswers(
 ){
     //Remove overflow setttings from UserProfilePageContent
     const upcw = document.getElementById('userProfileContentWrapper');
-    upcw.style.overflow = 'hidden';
+    if (upcw) {
+        upcw.style.overflow = 'auto';
+    } 
 
     return( 
         <UserAnswerQuestionsContent 

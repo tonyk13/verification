@@ -219,11 +219,7 @@ export default function EditQuestionPage({
     const handleDeleteQuestionButton = async (event) => {
         const userid = Cookie.get("userid");
         try {
-            
-            const pqDelete = await axios.delete(`http://localhost:8000/api/questions/${eqid}`);
-
             const pqDeleteformUser = await axios.delete(`http://localhost:8000/api/deleteQuestionFromUser/${userid}/questions/${eqid}`);
-            
         } catch (error) {
             console.error('Error:', error);
         }

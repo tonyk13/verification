@@ -51,7 +51,7 @@ router.post("/postQuestiontoUser/:_id/questions", postQuestiontoUser);
 // GET request for all user's questions
 router.get("/getUserQuestions/:_id", getUserQuestions);
 
-// DELETE request for a user's question
+// DELETE request for a user's question (handles deleting question from model, tags, commnets, and answers when applicable)
 router.delete("/deleteQuestionFromUser/:_id/questions/:_qid", deleteQuestionFromUser);
 
 // POST request for user's tag (SINGLE).

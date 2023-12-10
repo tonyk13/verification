@@ -59,52 +59,6 @@ exports.question_update = async (req, res) => {
     }
 };
 
-exports.question_delete = async (req, res) => {
-    try {
-        const questionId = req.params._id;
-        const deletedQuestion = await questionModel.findById(questionId);
-        
-        if (!deletedQuestion) {
-            return res.status(404).json({ message: 'Question not found' });
-        }
-
-        try {
-            const usersWithAnswersOrComments = await usersModel.find({
-                $or: [
-                    { answers: { $in: deletedQuestion.answers } },
-                    { comments: { $in: deletedQuestion.comments } }
-                ]
-            });
-
-            for (const user of usersWithAnswersOrComments) {
-                for (const answerId of deletedQuestion.answers) {
-                    if (user.answers.includes(answerId)) {
-                        user.answers.pull(answerId);
-                    }
-                }
-                for (const commentId of deletedQuestion.comments) {
-                    if (user.comments.includes(commentId)) {
-                        user.comments.pull(commentId);
-                    }
-                }
-                await user.save();
-            }
-        } catch (usersError) {
-            console.error('Error handling users:', usersError);
-            throw usersError;
-        }
-
-        await answersModel.deleteMany({ _id: { $in: deletedQuestion.answers } });
-        await commentsModel.deleteMany({ _id: { $in: deletedQuestion.comments } });
-        await questionModel.findByIdAndDelete(questionId);
-    } catch (error) {
-        console.error('Error in question_delete:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-
-
 exports.question_upvote = async (req, res, next) => {
     try {
         const userId = req.params.userId;
