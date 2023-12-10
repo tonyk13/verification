@@ -410,8 +410,7 @@ export default function UserProfilePage({
         setuserAnsweredQuestions(uniqueQA);
 
     }, [userAnswers]);
-    console.log(questions)
-    console.log(userAnsweredQuestions)
+    
     function formatDate(dateString) {
         const time = new Date(dateString);
     

@@ -170,7 +170,7 @@ module.exports.deleteQuestionFromUser = async (req, res) => {
     const questionId = req.params._qid;
     try {
         const user = await User.findOneAndUpdate({ _id: userId }, { $pull: { questions: questionId } }, { new: true });
-        console.log(user);
+      
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -207,7 +207,6 @@ module.exports.deleteTagFromUser = async (req, res) => {
     const tagId = req.params._tid;
     try {
         const user = await User.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true });
-        console.log(user);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
