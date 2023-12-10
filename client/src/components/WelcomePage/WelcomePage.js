@@ -122,7 +122,7 @@ function WelcomePageBox({
             <div id="welcomePageBox">
                 <LoginButton handleLoginClick={handleLoginClick}></LoginButton>
                 <CreateAccountButton handleCreateAccountClick={handleCreateAccountClick}></CreateAccountButton>
-                <text id="welcomePageBoxText">Just taking a look around?</text>
+                <div id="welcomePageBoxText">Just taking a look around?</div>
                 <GuestButton handleContinueAsGuestClick={handleContinueAsGuestClick}></GuestButton>
             </div>
         );

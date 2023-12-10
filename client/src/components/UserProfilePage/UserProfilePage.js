@@ -62,11 +62,11 @@ function UserQuestionBox({
    
 
     return (
-        <div class="userQuestionBox" onClick={() => handleQuestionClick(questionData.title)}>
-            <div class="userQuestionTitle">
+        <div className="userQuestionBox" onClick={() => handleQuestionClick(questionData.title)}>
+            <div className="userQuestionTitle">
                 {questionData.title}
             </div>
-            <div class="userQuestionSummary">
+            <div className="userQuestionSummary">
                 {questionData.summary}
             </div>
         </div>        

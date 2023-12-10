@@ -3,6 +3,7 @@ import "./QuestionsPage.css";
 import axios from "axios";
 import UpvoteButton from "../VotingButtons/UpvoteButton";
 import DownvoteButton from "../VotingButtons/DownvoteButton";
+import Cookie from "js-cookie";
 
 //questionBox
 function QuestionBox({
@@ -24,6 +25,7 @@ function QuestionBox({
         return tag ? tag.name : "";
     };
     const [questionVotes, setQuestionVotes] = useState(questions.votes);
+    const userid = Cookie.get("userid");
     useEffect(() => {
         if (questions) {
             axios
@@ -39,10 +41,13 @@ function QuestionBox({
 
     function handleQuestionUpvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${questions._id}/upvote`)
+            .put(`http://localhost:8000/api/questions/${questions._id}/users/${userid}/upvote`)
             .then((response) => {
-                const updatedQuestion = response.data;
-                setQuestionVotes(updatedQuestion.votes);
+                if (response.data.success) {
+                    setQuestionVotes(questionVotes + 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -51,10 +56,13 @@ function QuestionBox({
 
     function handleQuestionDownvote() {
         axios
-            .put(`http://localhost:8000/api/questions/${questions._id}/downvote`)
+            .put(`http://localhost:8000/api/questions/${questions._id}/users/${userid}/downvote`)
             .then((response) => {
-                const updatedQuestion = response.data;
-                setQuestionVotes(updatedQuestion.votes);
+                if (response.data.success) {
+                    setQuestionVotes(questionVotes - 1);
+                } else {
+                    alert(response.data.message);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -62,7 +70,7 @@ function QuestionBox({
     }
 
     return (
-        <div class="questionBox" key={questions._id}>
+        <div className="questionBox" key={questions._id}>
             {isGuest ? (
                 <div className="votesBox">
                     <div id="voteError">*</div>
@@ -75,9 +83,9 @@ function QuestionBox({
                     {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
                 </div>
             )}
-            <div class="titleTagWrapper">
+            <div className="titleTagWrapper">
                 <p
-                    class="questionTitle"
+                    className="questionTitle"
                     onClick={() => {
                         const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
                         setSelectedQuestion(selectedQuestion);
@@ -87,18 +95,18 @@ function QuestionBox({
                 >
                     {questionTitle}
                 </p>
-                <p class="questionSummary">{questionSummary}</p>
-                <div class="questionTags">
+                <p className="questionSummary">{questionSummary}</p>
+                <div className="questionTags">
                     {qTagArray.map((tid) => (
-                        <p class="qTag">{tidToTagName(tid)}</p>
+                        <p key={questions._id+tid} className="qTag">{tidToTagName(tid)}</p>
                     ))}
                 </div>
             </div>
-            <div class="askedData">
-                <p class="askedByName">{askedByName}</p>
-                <p class="askedByTime">{askedByTime}</p>
+            <div className="askedData">
+                <p className="askedByName">{askedByName}</p>
+                <p className="askedByTime">{askedByTime}</p>
             </div>
-            <p class="answerViewCount">{answerViewCount}</p>
+            <p className="answerViewCount">{answerViewCount}</p>
         </div>
     );
 }
@@ -218,7 +226,7 @@ function renderAllQuestions(
 
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
-            key={question.id}
+            key={question._id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
             questionSummary={question.summary}
