@@ -211,7 +211,7 @@ function renderUserAnswerQuestionsContent(
     setQuestionPageNumber,
     isGuest
 ) {
-    questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
+    questions.sort((x, y) => new Date(y.ask_date_time) - new Date(x.ask_date_time));
     let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
         questions,
         questionPageNumber,
@@ -247,7 +247,9 @@ export default function UserAnsweredQuestionsContent({
 }) {
     const [questionPageNumber, setQuestionPageNumber] = useState(1);
     const incrementQuestionPageNumber = () => {
-        setQuestionPageNumber(questionPageNumber + 1);
+        if (!((questions.length % 5 === 0) && (Math.floor(questions.length / 5) === questionPageNumber))) {
+            setQuestionPageNumber(questionPageNumber + 1);
+        }
     };
 
     const decrementQuestionPageNumber = () => {
