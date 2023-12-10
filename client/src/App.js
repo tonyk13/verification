@@ -180,6 +180,7 @@ function App() {
                     EditQuestionPage={EditQuestionPage}
                     setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
                     tags={tags}
+                    setSelectedQuestion={setSelectedQuestion}
                 />
             );
         } else if (currentPage === "singleTagPage") {

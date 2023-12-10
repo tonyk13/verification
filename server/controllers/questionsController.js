@@ -1,5 +1,6 @@
 const questionModel = require("../models/questions");
 const commentsModel = require("../models/comments");
+const answerModel = require("../models/answers")
 const usersModel = require("../models/users");
 
 exports.questions_list = async (req, res, next) => {
@@ -61,10 +62,18 @@ exports.question_update = async (req, res) => {
 exports.question_delete = async (req, res) => {
     try {
       const questionId = req.params._id;
-      const deletedQuestion = await questionModel.findByIdAndDelete(questionId);
+      const deletedQuestion = await questionModel.findById(questionId);
       if (!deletedQuestion) {
         return res.status(404).json({ message: 'Question not found' });
       }
+      for (const answerId of question.answers) {
+        await answerModel.findByIdAndDelete(answerId);
+      }
+
+      for (const commentId of question.comments) {
+        await commentModel.findByIdAndDelete(commentId);
+      }
+      
       res.json({ message: 'Question deleted successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
