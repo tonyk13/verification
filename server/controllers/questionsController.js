@@ -370,3 +370,19 @@ exports.question_add_comment = async (req, res, next) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+exports.question_view_increment = async (req, res) => {
+    try {
+        const questionId = req.params._id;
+        const question = await questionModel.findById(questionId);
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        question.views += 1;
+        await question.save();
+    } catch (error) {
+        console.error('Error in question_view_increment:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

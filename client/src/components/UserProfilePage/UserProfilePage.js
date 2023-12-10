@@ -293,6 +293,40 @@ function renderUserAnswers(
 
 
 
+//ALL USERS CONTENT (ONLY ADMIN)
+function UserBox({
+    key,
+    userid,
+    username,
+    userReputation,
+    setAdminViewUser
+
+}) {
+    return (
+        <div  className="userBox"   onClick={() => setAdminViewUser(userid)}>
+            <div className="userUserName">{username}</div>
+            <div className="userUserReputation">{userReputation}</div>
+        </div>
+    )
+}
+
+
+function renderAllUsers(
+    allUsers,
+    setAdminViewUser
+
+){
+    return allUsers.map((user) => (
+        <UserBox
+            key={user._id} 
+            userid={user._id}
+            username={user.username}
+            userReputation={user.reputation}
+            setAdminViewUser={setAdminViewUser}
+        />
+    ));
+}
+
 
 
 export default function UserProfilePage({ 
@@ -332,7 +366,10 @@ export default function UserProfilePage({
     const [userTags, setUserTags] = useState('');
     const [userAnswers, setUserAnswers] = useState('');
     const [questions, setQuestions] = useState([]);
-
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [allUsers, setAllUsers] = useState([]);
+    const [adminViewUser, setAdminViewUser] = useState('');
+    
 
 
     //USER DATA
@@ -345,6 +382,12 @@ export default function UserProfilePage({
                     setUsername(responseUsername.data.username);
                 } catch (error) {
                     console.error('Error fetching username:', error);
+                }
+                try {
+                    const responseIsAdmin = await axios.get(`http://localhost:8000/api/getUserIsAdmin/${userid}`);
+                    setIsAdmin(responseIsAdmin.data.isAdmin);
+                } catch (error) {
+                    console.error('Error fetching isAdmin: ', error);
                 }
 
                 try {
@@ -385,10 +428,19 @@ export default function UserProfilePage({
                 } catch (error) {
                     console.error('Error fetching user questions:', error);
                 }
+                try {
+                    const responseAllUsers = await axios.get(`http://localhost:8000/api/getAllUsers/${userid}`);
+                    setAllUsers(responseAllUsers.data.users)
+                } catch (error) {
+                    console.error('Error fetching all users:', error)
+                }
             }
             fetchData();
         }
     }, []);
+
+
+
 
     const [userAnsweredQuestions, setuserAnsweredQuestions] = useState([])
     useEffect(() => {
@@ -517,7 +569,7 @@ export default function UserProfilePage({
     
 
     const [userDisplay, setUserDisplay] = useState("userQuestions");
-    
+
     //Display Users Questions
     const displayUserQuestions = () => { 
         setUserDisplay("userQuestions");
@@ -530,149 +582,259 @@ export default function UserProfilePage({
     const displayUserAnswers = () => { 
         setUserDisplay("userAnswers");
     }
-    //Render Trigger
-   /* useEffect(() => {
-        console.log("render Trigger")
-    }, [userTags]);
-    */
 
+    const displayAllUsers = () => {
+        setUserDisplay("allUsers");
+    }
+
+    
+/*
+      useEffect (() =>{
+        console.log(adminViewUser)
+        setAdminViewUser(adm)
+      }, [adminViewUser]);
+*/
+    //Admin Viewing UserData
+    useEffect(() => {
+        if (!isGuest && isAdmin && adminViewUser!='') {
+            const userid = adminViewUser
+            async function fetchUserData() {
+                try {
+                    const responseUsername = await axios.get(`http://localhost:8000/api/getUsername/${userid}`);
+                    setUsername(responseUsername.data.username);
+                } catch (error) {
+                    console.error('Error fetching username:', error);
+                }
+                try {
+                    const responseUserReputation = await axios.get(`http://localhost:8000/api/getUserReputation/${userid}`);
+                    setUserReputation(responseUserReputation.data.reputation);
+                } catch (error) {
+                    console.error('Error fetching user reputation:', error);
+                }
+                try {
+                    const responseUserDateCreated = await axios.get(`http://localhost:8000/api/getUserDateCreated/${userid}`);
+                    setUserDateCreated(responseUserDateCreated.data.userDateCreated)
+                } catch (error) {
+                    console.error('Error fetching user date created:', error);
+                }
+                try {
+                    const responseUserQuestions = await axios.get(`http://localhost:8000/api/getUserQuestions/${userid}`);
+                    setUserQuestions(responseUserQuestions.data.userQuestions)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const userTags = await axios.get(`http://localhost:8000/api/getUserTags/${userid}`);
+                    setUserTags(userTags.data.userTags)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const allQuestions = await axios.get(`http://localhost:8000/api/questions/`);
+                    setQuestions(allQuestions.data)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+                try {
+                    const userAnswers = await axios.get(`http://localhost:8000/api/getUserAnswers/${userid}`);
+                    setUserAnswers(userAnswers.data.userAnswers)
+                } catch (error) {
+                    console.error('Error fetching user questions:', error);
+                }
+            }
+            fetchUserData();
+            displayUserQuestions();
+        }
+    }, [adminViewUser]);
+
+    useEffect(() => {
+        if (isAdmin) {
+            displayAllUsers();
+        }
+    }, [isAdmin]);
+   
+    
 
     return (
         <div id="userProfilePage">
-          {isGuest ? (
-            <div id="userProfilePageHeader">
-              <div id="mustBeLoggedInText">
-                *Must Be Logged In to Access User Profile Page
-              </div>
-            </div>
-          ) : (
+        {(isAdmin && !adminViewUser) ? (
             <div>
-              {editQuestionPage ? (
-                <div> 
-                    <EditQuestionPage
-                          setCurrentPage={setCurrentPage}
-                          setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
-                          tags={tags}
-                          eqTitle={eqTitle}
-                          eqSummary={eqSummary}
-                          eqText={eqText}
-                          eqTags={eqTags}
-                          eqid={eqid}
-                          toggleEditQuestionPage={toggleEditQuestionPage}
-                    />
-                </div>
-              ) : (
-                <div>
-                  <div id="userProfilePageHeader">
+                <div id="userProfilePageHeader">
                     <div id="upphRow1">
-                      User:
-                      <div className="userData">
+                    User:
+                    <div className="userData">
                         {username}
-                      </div>
+                    </div>
                     </div>
                     <div id="upphRow2">
-                      Reputation:
-                      <div className="userData">
+                    Reputation:
+                    <div className="userData">
                         {userReputation}
-                      </div>
+                    </div>
                     </div>
                     <div id="upphRow3">
-                      Joined:
-                      <div className="userData">
+                    Joined:
+                    <div className="userData">
                         {formatDate(userDateCreated)}
-                      </div>
                     </div>
-                    <div id="upphRow4">
-                      <div id="userProfileStatusButtons">
-                        <button onClick={displayUserQuestions}>
-                          My Questions
-                        </button>
-                        <button onClick={displayUserTags}>
-                          My Tags
-                        </button>
-                        <button onClick={displayUserAnswers}>
-                          My Answers
-                        </button>
-                      </div>
                     </div>
                     <br />
-                    {userDisplay === "userQuestions" && (
-                      <div>
-                        My Questions: {userQuestions.length}{" "}
-                        {userQuestions.length === 1 ? "Question" : "Questions"}
-                        <br />
-                        Click on a Question to Modify/Delete
-                      </div>
-                    )}
-      
-                    {userDisplay === "userTags" && (
-                      <div>
-                        My Tags: {userTags.length}{" "}
-                        {userTags.length === 1 ? "Tag" : "Tags"}
-                        <br />
-                        Click on a Tag to View Questions or Modify/Delete
-                      </div>
-                    )}
-      
-                    {userDisplay === "userAnswers" && (
-                      <div>
-                      My Answers: {userAnswers.length}{" "}
-                      {userAnswers.length === 1 ? "Answer" : "Answers"}
-                      <br />
-                      Click on a Question to Modify/Delete Your Answer
+                    <div>
+                    Number Of Registered Users: {allUsers.length}{" "}
+                            {allUsers.length === 1 ? "User" : "Users"}
+                            <br />
+                            Click on a User to view their profile
                     </div>
-                    )}
-                  </div>
-                  <div id="userProfileContentWrapper">
-                    {userDisplay === "userQuestions" && userQuestions && (
-                      <div id="userQuestionsContent">
-                        {renderUserQuestions(
-                          userQuestions,
-                          setCurrentPage,
-                          EditQuestionPage,
-                          setDataBaseUpdateTrigger,
-                          tags,
-                          toggleEditQuestionPage,
-                          seteqTitle,
-                          seteqSummary,
-                          seteqText,
-                          seteqTags,
-                          seteqid
-                        )}
-                      </div>
-                    )}
-                    {userDisplay === "userTags" && userTags && (
-                      <div id="userTagsContent">
-                        {renderUserTags(
-                          userTags,
-                          setCurrentPage,
-                          setSearchTrigger,
-                          tagsAndCounts,
-                          tagsAndEditable,
-                          setDataBaseUpdateTrigger,
-                          setUserTags,
-                          setUserDisplay
-                        )}
-                      </div>
-                    )}
-                    {userDisplay === "userAnswers" && userAnswers && (
-                      <div id="userAnswersContent">
-                        {renderUserAnswers(
-                            userAnsweredQuestions,
-                            setCurrentPage,
-                            setSelectedQuestion,
-                            tags,
-                            isGuest
-                        )}
-                      </div>
-                    )}
-                  </div>
                 </div>
-              )}
-            </div>
-          )}
+                <div id="allUsersContentWrapper">
+                    {userDisplay === "allUsers" && allUsers && (
+                            <div id="allUsersContent">
+                                {renderAllUsers(
+                                    allUsers,        
+                                    setAdminViewUser,                
+                                )}
+                            </div>
+                    )}
+                </div>
+            </div>          
+        ) : ( 
+            isGuest ? (
+                <div id="userProfilePageHeader">
+                <div id="mustBeLoggedInText">
+                    *Must Be Logged In to Access User Profile Page
+                </div>
+                </div>
+            ) : (
+                <div>
+                {editQuestionPage ? (
+                    <div> 
+                        <EditQuestionPage
+                            setCurrentPage={setCurrentPage}
+                            setDataBaseUpdateTrigger={setDataBaseUpdateTrigger}
+                            tags={tags}
+                            eqTitle={eqTitle}
+                            eqSummary={eqSummary}
+                            eqText={eqText}
+                            eqTags={eqTags}
+                            eqid={eqid}
+                            toggleEditQuestionPage={toggleEditQuestionPage}
+                        />
+                    </div>
+                ) : (
+                    <div>
+                    <div id="userProfilePageHeader">
+                        <div id="upphRow1">
+                        User:
+                        <div className="userData">
+                            {username}
+                        </div>
+                        </div>
+                        <div id="upphRow2">
+                        Reputation:
+                        <div className="userData">
+                            {userReputation}
+                        </div>
+                        </div>
+                        <div id="upphRow3">
+                        Joined:
+                        <div className="userData">
+                            {formatDate(userDateCreated)}
+                        </div>
+                        </div>
+                        <div id="upphRow4">
+                        <div id="userProfileStatusButtons">
+                            <button onClick={displayUserQuestions}>
+                            My Questions
+                            </button>
+                            <button onClick={displayUserTags}>
+                            My Tags
+                            </button>
+                            <button onClick={displayUserAnswers}>
+                            My Answers
+                            </button>
+                        </div>
+                        </div>
+                        <br />
+                        {userDisplay === "userQuestions" && (
+                        <div>
+                            My Questions: {userQuestions.length}{" "}
+                            {userQuestions.length === 1 ? "Question" : "Questions"}
+                            <br />
+                            Click on a Question to Modify/Delete
+                        </div>
+                        )}
+        
+                        {userDisplay === "userTags" && (
+                        <div>
+                            My Tags: {userTags.length}{" "}
+                            {userTags.length === 1 ? "Tag" : "Tags"}
+                            <br />
+                            Click on a Tag to View Questions or Modify/Delete
+                        </div>
+                        )}
+        
+                        {userDisplay === "userAnswers" && (
+                        <div>
+                        My Answers: {userAnswers.length}{" "}
+                        {userAnswers.length === 1 ? "Answer" : "Answers"}
+                        <br />
+                        Click on a Question to Modify/Delete Your Answer
+                        </div>
+                        )}
+                    </div>
+                    <div id="userProfileContentWrapper">
+                        {userDisplay === "userQuestions" && userQuestions && (
+                        <div id="userQuestionsContent">
+                            {renderUserQuestions(
+                            userQuestions,
+                            setCurrentPage,
+                            EditQuestionPage,
+                            setDataBaseUpdateTrigger,
+                            tags,
+                            toggleEditQuestionPage,
+                            seteqTitle,
+                            seteqSummary,
+                            seteqText,
+                            seteqTags,
+                            seteqid
+                            )}
+                        </div>
+                        )}
+                        {userDisplay === "userTags" && userTags && (
+                        <div id="userTagsContent">
+                            {renderUserTags(
+                            userTags,
+                            setCurrentPage,
+                            setSearchTrigger,
+                            tagsAndCounts,
+                            tagsAndEditable,
+                            setDataBaseUpdateTrigger,
+                            setUserTags,
+                            setUserDisplay
+                            )}
+                        </div>
+                        )}
+                        {userDisplay === "userAnswers" && userAnswers && (
+                        <div id="userAnswersContent">
+                            {renderUserAnswers(
+                                userAnsweredQuestions,
+                                setCurrentPage,
+                                setSelectedQuestion,
+                                tags,
+                                isGuest
+                            )}
+                        </div>
+                        )}
+                    </div>
+                    </div>
+                )}
+                </div>
+            )
+        )}
         </div>
       );
-}
 
+
+
+}
 

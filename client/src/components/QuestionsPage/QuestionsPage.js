@@ -195,6 +195,7 @@ function getQuestionsBasedOnPageNumber(questions, questionPageNumber, setQuestio
     if (endIndex > questions.length) {
         endIndex = questions.length;
     }
+
     let questionsBasedOnPageNumber = [...questions].slice(startIndex, endIndex);
     return questionsBasedOnPageNumber;
 }
@@ -208,7 +209,7 @@ function renderAllQuestions(
     setQuestionPageNumber,
     isGuest
 ) {
-    questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
+    questions.sort((x, y) => new Date(y.ask_date_time) - new Date(x.ask_date_time));
     let questionsBasedOnPageNumber = getQuestionsBasedOnPageNumber(
         questions,
         questionPageNumber,
@@ -249,7 +250,7 @@ function getQuestionfromAnswer(questionsArray, answerID) {
 function activeSort(questionsArray, answersArray) {
     let returnArray = [];
 
-    const activeSortTempArray = answersArray.sort((a, b) => new Date(a.ans_date_time) - new Date(b.ans_date_time));
+    const activeSortTempArray = answersArray.sort((a, b) => new Date(b.ans_date_time) - new Date(a.ans_date_time));
 
     for (const answer of activeSortTempArray) {
         const question = getQuestionfromAnswer(questionsArray, answer._id);
@@ -305,7 +306,7 @@ function renderUnansweredQuestions(
     setQuestionPageNumber,
     isGuest
 ) {
-    questions.sort((x, y) => x.ask_date_time - y.ask_date_time);
+    questions.sort((x, y) => new Date(y.ask_date_time) - new Date(x.ask_date_time));
 
     let unansweredQuestions = questions.filter((question) => question.answers.length === 0);
 
@@ -448,7 +449,9 @@ function QuestionsPage({
     };
 
     const incrementQuestionPageNumber = () => {
-        setQuestionPageNumber(questionPageNumber + 1);
+        if (!((questions.length % 5 === 0) && (Math.floor(questions.length / 5) === questionPageNumber))) {
+            setQuestionPageNumber(questionPageNumber + 1);
+        }
     };
 
     const decrementQuestionPageNumber = () => {

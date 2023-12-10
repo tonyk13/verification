@@ -241,3 +241,27 @@ module.exports.getUserAnswers = async (req, res) => {
     const userAnswers = response.answers;
     return res.json({ userAnswers });
 };
+
+
+
+module.exports.getUserIsAdmin = async (req, res) => {
+    const objectIdString = req.params._id;
+    const response = await User.findById(objectIdString);
+    const isAdmin = response.isAdmin;
+    return res.json({ isAdmin });
+}
+
+module.exports.getAllUsers = async (req, res) => {
+    const objectIdString = req.params._id;
+    try {
+        const response = await User.findById(objectIdString);
+        const isAdmin = response.isAdmin;
+        if (!isAdmin) {
+            return res.status(200).json({ message: "User not recognized as Admin"});
+        }
+        const allUsers = await User.find();
+        return res.json({ users: allUsers });
+    } catch {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
