@@ -148,6 +148,8 @@ export default function AskQuestionPage({
 
     // Post Question Button
     const handlePostQuestionButton = async (event) => {
+     
+
         try {
         event.preventDefault();
         
@@ -164,36 +166,46 @@ export default function AskQuestionPage({
             } catch (error) {
                 console.error('Error fetching user reputation:', error);
             }
-   
-    
-            // Post Question
-            let postQuestion = {
-                title: document.getElementById("pqTitle").value,
-                summary: document.getElementById("pqSummary").value,
-                text: document.getElementById("pqText").value,
-                tags: pqTagArray,
-                answers: new Array(0),
-                asked_by: pqUsername,
-                ask_date_time: new Date(),
-                views: 0,
-                comments: new Array(0),
-                votes: 0,
-            };
 
-            // POST Question, POST Question to USER
             try {
-                const pqResponse = await axios.post('http://localhost:8000/api/questions', postQuestion, {
-                  headers: {
-                    'Content-Type': 'application/json',
-                  }
-                });
-                const pqToUserResponse = await axios.post(`http://localhost:8000/api/postQuestiontoUser/${userid}/questions`, pqResponse.data);
-              } catch (error) {
-                console.error('Error:', error);
-              }
-            setCurrentPage("questionsPage");
-            // Update trigger
-            await handleUpdateTrigger();
+                const responseReputation = await axios.get(`http://localhost:8000/api/getUserReputation/${userid}`);
+                pqReputation = responseReputation.data.reputation;
+            } catch (error) {
+                console.error('Error fetching user reputation:', error);
+            }
+
+            if (pqReputation < 50) {
+                alert("Can not ask a question since the User's Reputation is below 50");
+            } else {
+                // Post Question
+                let postQuestion = {
+                    title: document.getElementById("pqTitle").value,
+                    summary: document.getElementById("pqSummary").value,
+                    text: document.getElementById("pqText").value,
+                    tags: pqTagArray,
+                    answers: new Array(0),
+                    asked_by: pqUsername,
+                    ask_date_time: new Date(),
+                    views: 0,
+                    comments: new Array(0),
+                    votes: 0,
+                };
+
+                // POST Question, POST Question to USER
+                try {
+                    const pqResponse = await axios.post('http://localhost:8000/api/questions', postQuestion, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                    });
+                    const pqToUserResponse = await axios.post(`http://localhost:8000/api/postQuestiontoUser/${userid}/questions`, pqResponse.data);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+                setCurrentPage("questionsPage");
+                // Update trigger
+                await handleUpdateTrigger();
+            }
         }
         } catch (error) {
         console.error('Error:', error);

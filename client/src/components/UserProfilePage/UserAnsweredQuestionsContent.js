@@ -62,7 +62,7 @@ function QuestionBox({
     }
 
     return (
-        <div class="questionBox" key={questions._id}>
+        <div className="questionBox" key={questions._id}>
             {isGuest ? (
                         <div className="votesBox">
                             <div id="voteError">*</div>
@@ -75,9 +75,9 @@ function QuestionBox({
                             {<DownvoteButton handleDownvote={handleQuestionDownvote}></DownvoteButton>}
                         </div>
             )}
-            <div class="titleTagWrapper">
+            <div className="titleTagWrapper">
                 <p
-                    class="questionTitle"
+                    className="questionTitle"
                     onClick={() => {
                         const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
                         setSelectedQuestion(selectedQuestion);
@@ -88,21 +88,21 @@ function QuestionBox({
                 >
                     {questionTitle}
                 </p>
-                <p class="questionSummary">
+                <p className="questionSummary">
                     {questionSummary}
                 </p>
-                <div class="questionTags">
+                <div className="questionTags">
                     {qTagArray.map((tid) => (
-                        <p class="qTag">{tidToTagName(tid)}</p>
+                        <p key={questions._id+tid} className="qTag">{tidToTagName(tid)}</p>
                     ))
                     }
                 </div>
             </div>
-            <div class="askedData">
-                <p class="askedByName">{askedByName}</p>
-                <p class="askedByTime">{askedByTime}</p>
+            <div className="askedData">
+                <p className="askedByName">{askedByName}</p>
+                <p className="askedByTime">{askedByTime}</p>
             </div>
-            <p class="answerViewCount">{answerViewCount}</p>
+            <p className="answerViewCount">{answerViewCount}</p>
         </div>
     );
 }
@@ -220,7 +220,7 @@ function renderUserAnswerQuestionsContent(
 
     return questionsBasedOnPageNumber.map((question) => (
         <QuestionBox
-            key={question.id}
+            key={question._id}
             answerViewCount={`${question.answers.length} answers ${question.views} views`}
             questionTitle={question.title}
             questionSummary={question.summary}

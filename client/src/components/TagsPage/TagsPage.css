@@ -20,18 +20,18 @@
 }
 
 .tagsPageHeader {
-    position: absolute;
     font-size: 50px;
     font-family: sans-serif;
     left: 22.5%;
-    top: 15%;
+    margin-top: 8%;
+    margin-left: 25%;
 }
 
 #tagsContainer {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 50px;
-    margin-top: 15%;
+    margin-top: 5%;
     margin-left: 25%;
     margin-right: 10%;
 }
