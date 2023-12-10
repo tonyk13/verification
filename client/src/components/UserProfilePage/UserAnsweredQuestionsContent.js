@@ -81,6 +81,7 @@ function QuestionBox({
                     onClick={() => {
                         const selectedQuestion = questionsArray.find((question) => question.title === questionTitle);
                         setSelectedQuestion(selectedQuestion);
+                        console.log(selectedQuestion);
                         selectedQuestion.views += 1;
                         //setCurrentPage("answersPage");
                     }}

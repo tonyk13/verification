@@ -3,7 +3,7 @@ import axios from "axios";
 import "./NewAnswerPage.css";
 import Cookie from "js-cookie";
 
-export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
+export default function NewAnswerPage({ selectedQuestion, setCurrentPage, setDataBaseUpdateTrigger }) {
     const [answer, setAnswer] = useState("");
     const [error, setError] = useState("");
 
@@ -58,6 +58,18 @@ export default function NewAnswerPage({ selectedQuestion, setCurrentPage }) {
 
             selectedQuestion = response.data.updatedQuestion;
 
+            //UpdateTrigger to handle answers count
+            const handleUpdateTrigger = async () => {
+                return new Promise((resolve) => {
+                setDataBaseUpdateTrigger((prev) => {
+                    setTimeout(() => {
+                    resolve(); 
+                    }, 1000);
+                    return prev + 1;
+                });
+                });
+            };
+            handleUpdateTrigger();
             setCurrentPage("answersPage");
         } catch (error) {
             console.error("Error posting answer:", error);

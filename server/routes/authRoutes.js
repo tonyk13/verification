@@ -16,6 +16,8 @@ const {
     deleteTagFromUser,
     postAnswerToUser,
     getUserAnswers,
+    getUserIsAdmin,
+    getAllUsers
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
@@ -66,5 +68,11 @@ router.post("/postAnswerToUser/:_id/answers", postAnswerToUser);
 
 // GET request for all user's answers
 router.get("/getUserAnswers/:_id", getUserAnswers);
+
+// GET request for a user's isAdmin value.
+router.get("/getUserIsAdmin/:_id", getUserIsAdmin);
+
+// GET request for all user's data (user must have isAdmin:True)
+router.get("/getAllUsers/:_id", getAllUsers);
 
 module.exports = router;
