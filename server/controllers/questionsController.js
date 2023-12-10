@@ -55,7 +55,7 @@ exports.question_update = async (req, res) => {
         {  title, summary, text, tags },
         { new: true }
       );
-
+        console.log(user)
         //Fix DataBase of edited tags
         for (const tagId of questionTagsBeforeEditing) {
             const questionWithTagCheck = await questionModel.findOne({ tags: tagId });

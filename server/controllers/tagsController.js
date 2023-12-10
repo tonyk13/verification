@@ -1,4 +1,5 @@
 const tagsModel = require("../models/tags");
+const questionModel = require("../models/questions");
 
 // GET request for all the tags.
 exports.tags_list = async (req, res, next) => {
@@ -68,6 +69,8 @@ exports.tag_delete = async (req, res) => {
       if (!deletedTag) {
         return res.status(404).json({ message: 'Tag not found' });
       }
+      await questionModel.updateMany({ tags: _id }, { $pull: { tags: _id } });
+      
       res.json({ message: 'Tag deleted successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
