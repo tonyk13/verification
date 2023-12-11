@@ -1,6 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/9NDadFFr)
 Add design docs in _images/_
-
+## Fake Stack Overflow
 ## Instructions to setup and run project
 
 ## 1) Start mongod (Console 1)
@@ -13,6 +13,7 @@ mongod
 
 ```
 cd server
+npm install
 node server.js --secret-key default_secret_key
 ```
 
@@ -20,6 +21,7 @@ node server.js --secret-key default_secret_key
 
 ```
 cd client
+npm install
 npm start
 ```
 
