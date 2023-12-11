@@ -170,7 +170,7 @@ export default function EditQuestionPage({
                 userid = adminViewUser
             }
             let pqTagArray = await checkQuestionTags(pqTagStringArray, userid);
-     
+            console.log(pqTagArray)
             let pqReputation = "";
             let pqUsername = "";
 

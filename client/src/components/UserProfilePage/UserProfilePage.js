@@ -387,6 +387,7 @@ export default function UserProfilePage({
                     setUsername(responseUsername.data.username);
                 } catch (error) {
                     console.error('Error fetching username:', error);
+                    alert("Error Getting User Data")
                 }
                 try {
                     const responseIsAdmin = await axios.get(`http://localhost:8000/api/getUserIsAdmin/${userid}`);
@@ -658,6 +659,34 @@ export default function UserProfilePage({
         }
     }, [isAdmin]);
    
+    const handleUpdateTrigger = async () => {
+        return new Promise((resolve) => {
+        setDataBaseUpdateTrigger((prev) => {
+            setTimeout(() => {
+            resolve(); // Resolve the promise after the timeout
+            }, 1000);
+            return prev + 1;
+        });
+        });
+    };
+
+
+
+    async function adminDeleteUser(){
+        try{
+            for (const q of userQuestions) {
+                await axios.delete(`http://localhost:8000/api/deleteQuestionFromUser/${adminViewUser}/questions/${q}`);
+                await handleUpdateTrigger();
+            }
+            
+            await axios.delete(`http://localhost:8000/api/deleteUser/${adminViewUser}`);
+            await handleUpdateTrigger();
+        } catch (error) {
+            console.log("Error Deleting User: ", error)
+        } finally {
+            setCurrentPage("questionsPage");
+        }
+    }
     
 
     return (
@@ -788,6 +817,12 @@ export default function UserProfilePage({
                         Click on a Question to Modify/Delete Your Answer
                         </div>
                         )}
+                        <br />
+                        {
+                            (isAdmin && adminViewUser !== Cookie.get("userid")) ? 
+                            <button id="DeleteUserButton" onClick={adminDeleteUser}>Delete User</button> : 
+                            (isAdmin ? <div id="cantDeleteAdmin">*Can not Delete Admin Account</div> : null)
+                        }
                     </div>
                     <div id="userProfileContentWrapper">
                         {userDisplay === "userQuestions" && userQuestions && (

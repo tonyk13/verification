@@ -17,7 +17,8 @@ const {
     postAnswerToUser,
     getUserAnswers,
     getUserIsAdmin,
-    getAllUsers
+    getAllUsers,
+    deleteUser
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
@@ -74,5 +75,8 @@ router.get("/getUserIsAdmin/:_id", getUserIsAdmin);
 
 // GET request for all user's data (user must have isAdmin:True)
 router.get("/getAllUsers/:_id", getAllUsers);
+
+// DELETE request for a user
+router.delete("/deleteUser/:_id", deleteUser);
 
 module.exports = router;
