@@ -3,27 +3,27 @@ Add design docs in _images/_
 
 ## Instructions to setup and run project
 
-# 1) Start mongod (Console 1)
+## 1) Start mongod (Console 1)
 
 ```
 mongod
 ```
 
-# 2) Start server (Console 2)
+## 2) Start server (Console 2)
 
 ```
 cd server
 node server.js --secret-key default_secret_key
 ```
 
-# 3) Start client interface (Console 3)
+## 3) Start client interface (Console 3)
 
 ```
 cd client
 npm start
 ```
 
-# 4) Initializing Starting Data (Console 4)
+## 4) Initializing Starting Data (Console 4)
 
 ```
 cd server
@@ -37,7 +37,7 @@ password: sudopassword
 
 ## Team Member 1 Contribution
 
-Vignesh Nair
+**Vignesh Nair**
 
 -   Home page (guest user)
 -   Home page (registered user)
@@ -49,7 +49,7 @@ Vignesh Nair
 
 ## Team Member 2 Contribution
 
-Tony Kareeparampil
+**Tony Kareeparampil**
 
 -   Create account
 -   Login
