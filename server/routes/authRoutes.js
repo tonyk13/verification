@@ -17,7 +17,7 @@ const {
     postAnswerToUser,
     getUserAnswers,
     getUserIsAdmin,
-    getAllUsers
+    getAllUsers,
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
