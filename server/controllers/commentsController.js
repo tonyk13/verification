@@ -16,7 +16,7 @@ exports.upvoteComment = async (req, res, next) => {
         const containsGivenIdInUpvotedComments = upvotedCommentsInUser.includes(req.params.commentId);
 
         if (containsGivenIdInUpvotedComments) {
-            return res.json({ message: "User has already upvoted this comment", success: false });
+            return res.json({ message: "Error: User has already upvoted this comment", success: false });
         }
 
         const downvotedCommentsInUser = user.downvotedComments;
