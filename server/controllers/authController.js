@@ -168,10 +168,6 @@ module.exports.getUserQuestions = async (req, res) => {
     return res.json({ userQuestions });
 };
 
-
-
-
-
 /*
 1) Delete Question from User
 2) 
@@ -191,69 +187,60 @@ module.exports.deleteQuestionFromUser = async (req, res) => {
     const userId = req.params._id;
     const questionId = req.params._qid;
     try {
-        const question = await questionsModel.findById(questionId)
+        const question = await questionsModel.findById(questionId);
         if (!question) {
             return res.status(404).json({ message: "User not found" });
         }
-        // #1 
+        // #1
         const user = await User.findOneAndUpdate({ _id: userId }, { $pull: { questions: questionId } }, { new: true });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-
-        //#2 
+        //#2
         for (const ansId of question.answers) {
             //#2a
-            await answersModel.findByIdAndDelete(ansId)
+            await answersModel.findByIdAndDelete(ansId);
 
             //#2b
-            await User.updateMany(
-                { answers: ansId },
-                { $pull: { answers: ansId } }
-            );
+            await User.updateMany({ answers: ansId }, { $pull: { answers: ansId } });
         }
 
         //#3
         for (const comId of question.comments) {
             //#3a
-            await commentsModel.findByIdAndDelete(comId)
+            await commentsModel.findByIdAndDelete(comId);
 
             //#3b
-            await User.updateMany(
-                { comments: comId },
-                { $pull: { comments: comId } }
-            );
+            await User.updateMany({ comments: comId }, { $pull: { comments: comId } });
         }
 
         //Save deletedQuestion Tags for later
-        const deletedQuestionTags = question.tags
-
+        const deletedQuestionTags = question.tags;
 
         //#4
-        await questionsModel.findByIdAndDelete(questionId)
- 
+        await questionsModel.findByIdAndDelete(questionId);
+
         //#5
         for (const tagId of deletedQuestionTags) {
             //#5a
             const questionWithTagCheck = await questionsModel.findOne({ tags: tagId });
             if (!questionWithTagCheck) {
                 await tagsModel.findByIdAndDelete(tagId);
-                await User.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+                await User.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true });
             }
 
             //#5b
             for (const qid of user.questions) {
                 const userQuestionsWithTagsCheck = await questionsModel.findOne({
                     tags: tagId,
-                    asked_by: user.username
+                    asked_by: user.username,
                 });
 
                 if (!userQuestionsWithTagsCheck) {
-                    User.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+                    User.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true });
                 }
             }
-
         }
         res.status(200).json({ message: "Deletion successful" });
     } catch (error) {
@@ -302,19 +289,18 @@ module.exports.postAnswerToUser = async (req, res) => {
     try {
         const user = await User.findById(userId);
         const ansId = req.body._id;
-    
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
         user.answers.push(ansId);
         await user.save();
-    
+
         return res.status(200).json({ message: "Post Answer to User Successful" });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
-
 
 module.exports.getUserAnswers = async (req, res) => {
     const objectIdString = req.params._id;
@@ -323,14 +309,12 @@ module.exports.getUserAnswers = async (req, res) => {
     return res.json({ userAnswers });
 };
 
-
-
 module.exports.getUserIsAdmin = async (req, res) => {
     const objectIdString = req.params._id;
     const response = await User.findById(objectIdString);
     const isAdmin = response.isAdmin;
     return res.json({ isAdmin });
-}
+};
 
 module.exports.getAllUsers = async (req, res) => {
     const objectIdString = req.params._id;
@@ -338,15 +322,14 @@ module.exports.getAllUsers = async (req, res) => {
         const response = await User.findById(objectIdString);
         const isAdmin = response.isAdmin;
         if (!isAdmin) {
-            return res.status(200).json({ message: "User not recognized as Admin"});
+            return res.status(200).json({ message: "User not recognized as Admin" });
         }
         const allUsers = await User.find();
         return res.json({ users: allUsers });
     } catch {
         return res.status(500).json({ error: "Internal Server Error" });
     }
-}
-
+};
 
 module.exports.deleteUser = async (req, res) => {
     try {
@@ -355,5 +338,5 @@ module.exports.deleteUser = async (req, res) => {
     } catch {
         return res.status(500).json({ error: "Internal Server Error" });
     }
-    return res.status(200).json({ message: "Succesfully Deleted User"});
-}
+    return res.status(200).json({ message: "Succesfully Deleted User" });
+};

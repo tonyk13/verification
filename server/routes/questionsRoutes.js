@@ -32,5 +32,4 @@ router.post("/questions/:questionId/users/:userId/comments", questionsController
 // PUT request for incrementing a questions views
 router.put("/questions/:_id/views", questionsController.question_view_increment);
 
-
 module.exports = router;

@@ -18,7 +18,7 @@ const {
     getUserAnswers,
     getUserIsAdmin,
     getAllUsers,
-    deleteUser
+    deleteUser,
 } = require("../controllers/authController");
 const { userVerification } = require("../authMiddleware");
 
