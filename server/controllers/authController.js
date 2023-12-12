@@ -330,3 +330,13 @@ module.exports.getAllUsers = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+module.exports.deleteUser = async (req, res) => {
+    try {
+        const objectIdString = req.params._id;
+        await User.findByIdAndDelete(objectIdString);
+    } catch {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+    return res.status(200).json({ message: "Succesfully Deleted User" });
+};

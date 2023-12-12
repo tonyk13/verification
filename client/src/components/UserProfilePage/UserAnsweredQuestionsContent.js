@@ -83,7 +83,7 @@ function QuestionBox({
                         setSelectedQuestion(selectedQuestion);
                         console.log(selectedQuestion);
                         selectedQuestion.views += 1;
-                        //setCurrentPage("answersPage");
+                        setCurrentPage("answersPage");
                     }}
                 >
                     {questionTitle}

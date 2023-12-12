@@ -176,3 +176,20 @@
     margin-left: 1vh;
     margin-top: 1vh;
 }
+
+#DeleteUserButton{
+    background-color: red;
+    color:white;
+    border: 1.5px solid black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    width: 30%;
+    margin-bottom: 1vh;
+}
+
+
+#cantDeleteAdmin{
+    color:red;
+}

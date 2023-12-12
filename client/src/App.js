@@ -65,6 +65,9 @@ function App() {
                 setQuestions(Object.values(response.data));
             } catch (error) {
                 console.error("Error fetching data:", error);
+                if(isLoggedIn){
+                    alert("Error Fetching Questions");
+                }
             }
         };
 
@@ -78,6 +81,9 @@ function App() {
                 setTags(Object.values(response.data));
             } catch (error) {
                 console.error("Error fetching tags:", error);
+                if(isLoggedIn){
+                    alert("Error Fetching Tags");
+                }
             }
         };
         fetchTags();
