@@ -1,6 +1,5 @@
 import React from "react";
 import "./Header.css";
-import { useEffect } from "react";
 
 function Header({ setSearch, handleLogout, isGuest }) {
     const handleSearch = (event) => {

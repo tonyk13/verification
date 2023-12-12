@@ -293,11 +293,12 @@ function QuestionWrapper({ selectedQuestion, questionVotes, setQuestionVotes, re
                     author: Cookie.get("auth"),
                 })
                 .then((response) => {
-                    if (!response.data.success) {
+                    if (response.data.success == false) {
                         alert(response.data.message);
+                    } else {
+                        console.log(response.data);
+                        setNewCommentCounter(newCommentCounter + 1);
                     }
-                    console.log(response.data);
-                    setNewCommentCounter(newCommentCounter + 1);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -378,7 +379,7 @@ function QuestionCommentsWrapper({ selectedQuestion, newCommentCounter, register
             axios
                 .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/comments`)
                 .then((response) => {
-                    setComments(Object.values(response.data));
+                    setComments(Object.values(response.data).sort((a, b) => new Date(b.time) - new Date(a.time)));
                     console.log("re-rendering question's comments...");
                 })
                 .catch((error) => {
@@ -453,7 +454,7 @@ function AnswerCommentsWrapper({ selectedQuestion, answer, newCommentCounter, re
             axios
                 .get(`http://localhost:8000/api/questions/${selectedQuestion._id}/answers/${answer._id}/comments`)
                 .then((response) => {
-                    setComments(Object.values(response.data));
+                    setComments(Object.values(response.data).sort((a, b) => new Date(b.time) - new Date(a.time)));
                 })
                 .catch((error) => {
                     console.error(error);
@@ -546,13 +547,6 @@ function Comment({ commentId, commentText, commentAuthor, commentVotes, register
                         ></UpvoteButton>
                     )}
                     <div className="questionVotes">{votes} votes</div>
-                    {/* {registeredUser && (
-                        <DownvoteButton
-                            handleDownvote={() => {
-                                handleCommentDownvote(commentId);
-                            }}
-                        ></DownvoteButton>
-                    )} */}
                 </div>
             </div>
             <div className="commentBox">
@@ -587,7 +581,7 @@ const AnswersWrapper = ({
         setStartIndex(newIndex);
     };
 
-    answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
+    answers.sort((a, b) => new Date(b.ans_date_time) - new Date(a.ans_date_time));
 
     const visibleElements = answers.slice(startIndex, startIndex + itemsPerPage);
 
@@ -674,10 +668,11 @@ function Answer({
                     }
                 )
                 .then((response) => {
-                    if (!response.data.success) {
+                    if (response.data.success == false) {
                         alert(response.data.message);
+                    } else {
+                        setNewCommentCounter(newCommentCounter + 1);
                     }
-                    setNewCommentCounter(newCommentCounter + 1);
                 })
                 .catch((error) => {
                     console.error(error);

@@ -1,8 +1,20 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/9NDadFFr)
 Add design docs in _images/_
+# Fake Stack Overflow
+A replica of the popular Q&A platform for users to ask and answer technical questions  
 
+**Features:**  
+- Account Registraion, Login, Logout
+- Forum posts, questions, answers, comments
+- Searching by questions or tags
+- User Profile
+- Adminstrator account and privileges 
 ## Instructions to setup and run project
-
+- To begin first clone/download the repository and enter the directory inside the console:  
+```
+cd path/to/projectfakeso-shoulda
+```
+- To start the application, run each set of commands in four different consoles inside the directory:  
 ## 1) Start mongod (Console 1)
 
 ```
@@ -13,6 +25,7 @@ mongod
 
 ```
 cd server
+npm install
 node server.js --secret-key default_secret_key
 ```
 
@@ -20,6 +33,7 @@ node server.js --secret-key default_secret_key
 
 ```
 cd client
+npm install
 npm start
 ```
 
