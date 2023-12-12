@@ -1,7 +1,7 @@
 import React from "react";
 import "./Sidebar.css";
 
-export default function Sidebar({ currentPage, setCurrentPage, setSearchTrigger, setSearch }) {
+export default function Sidebar({ setCurrentPage, setSearchTrigger, setSearch }) {
     const loadQuestionsPage = () => {
         setSearchTrigger("");
         setSearch("");

@@ -546,13 +546,6 @@ function Comment({ commentId, commentText, commentAuthor, commentVotes, register
                         ></UpvoteButton>
                     )}
                     <div className="questionVotes">{votes} votes</div>
-                    {/* {registeredUser && (
-                        <DownvoteButton
-                            handleDownvote={() => {
-                                handleCommentDownvote(commentId);
-                            }}
-                        ></DownvoteButton>
-                    )} */}
                 </div>
             </div>
             <div className="commentBox">
