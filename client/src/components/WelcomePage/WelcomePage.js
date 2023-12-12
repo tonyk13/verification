@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { React, useState } from "react";
 import axios from "axios";
 import "./WelcomePage.css";
 import Cookie from "js-cookie";
@@ -175,7 +175,7 @@ function LoginForm({ setIsLoggingIn, setIsLoggedIn, setCurrentPage }) {
                 console.log("Successfully logged in");
 
                 Cookie.set("auth", data.message, { expires: 7 });
-                Cookie.set("userid", data._id, {expires: 7});
+                Cookie.set("userid", data._id, { expires: 7 });
 
                 return;
             }
