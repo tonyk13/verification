@@ -79,7 +79,7 @@ exports.answer_add_comment = async (req, res, next) => {
         await comment.save();
         await answer.save();
 
-        return res.status(201).json(comment);
+        return res.status(201).json({ comment, success: true });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

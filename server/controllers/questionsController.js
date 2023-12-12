@@ -42,47 +42,47 @@ exports.question_get = async (req, res, next) => {
 
 exports.question_update = async (req, res) => {
     try {
-      const questionId = req.params._id;
-      const { title, summary, text, tags } = req.body;
-      const questionBeforeEditing = await questionModel.findById(questionId);
-      const questionTagsBeforeEditing = questionBeforeEditing.tags;
-      const username = questionBeforeEditing.asked_by;
-      const user = await usersModel.findOne({ username: username, questions: questionId });
-      const userId = user._id;
-      
-      const updatedQuestion = await questionModel.findByIdAndUpdate(
-        questionId,
-        {  title, summary, text, tags },
-        { new: true }
-      );
-        console.log(user)
+        const questionId = req.params._id;
+        const { title, summary, text, tags } = req.body;
+        const questionBeforeEditing = await questionModel.findById(questionId);
+        const questionTagsBeforeEditing = questionBeforeEditing.tags;
+        const username = questionBeforeEditing.asked_by;
+        const user = await usersModel.findOne({ username: username, questions: questionId });
+        const userId = user._id;
+
+        const updatedQuestion = await questionModel.findByIdAndUpdate(
+            questionId,
+            { title, summary, text, tags },
+            { new: true }
+        );
+        console.log(user);
         //Fix DataBase of edited tags
         for (const tagId of questionTagsBeforeEditing) {
             const questionWithTagCheck = await questionModel.findOne({ tags: tagId });
             if (!questionWithTagCheck) {
                 await tagsModel.findByIdAndDelete(tagId);
-                await usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+                await usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true });
             }
 
             for (const qid of user.questions) {
                 const userQuestionsWithTagsCheck = await questionModel.findOne({
                     tags: tagId,
-                    asked_by: user.username
+                    asked_by: user.username,
                 });
 
                 if (!userQuestionsWithTagsCheck) {
-                    usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true })
+                    usersModel.findOneAndUpdate({ _id: userId }, { $pull: { tags: tagId } }, { new: true });
                 }
-            }  
             }
+        }
 
-      if (!updatedQuestion) {
-        return res.status(404).json({ message: "Question not found" });
-      }
-  
-      res.json({ message: "Question updated successfully", updatedQuestion });
+        if (!updatedQuestion) {
+            return res.status(404).json({ message: "Question not found" });
+        }
+
+        res.json({ message: "Question updated successfully", updatedQuestion });
     } catch (error) {
-      res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -346,7 +346,7 @@ exports.question_add_comment = async (req, res, next) => {
         await comment.save();
         await question.save();
 
-        return res.status(201).json(comment);
+        return res.status(201).json({ comment, success: true });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -357,13 +357,13 @@ exports.question_view_increment = async (req, res) => {
         const questionId = req.params._id;
         const question = await questionModel.findById(questionId);
         if (!question) {
-            return res.status(404).json({ message: 'Question not found' });
+            return res.status(404).json({ message: "Question not found" });
         }
 
         question.views += 1;
         await question.save();
     } catch (error) {
-        console.error('Error in question_view_increment:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Error in question_view_increment:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
