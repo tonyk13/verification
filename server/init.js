@@ -201,33 +201,40 @@ const populate = async () => {
     let a16 = await answerCreate('for (int i = 0; i < 100; i++) { printf("%d", i); }', "tooNice", false);
     let a17 = await answerCreate("this is cheating, I'm reporting you", "academicallyHonestGuy", false);
 
-    let c1 = await commentCreate("I'm having the same issue", "hamkalo", 4, false, false, false);
-    let c2 = await commentCreate("I'm having the same issue", "azad", 2, false, false, false);
-    let c3 = await commentCreate("I'm having the same issue", "abaya", 1, false, false, false);
-    let c4 = await commentCreate("I'm having the same issue", "alia", 1, false, false, false);
-    let c5 = await commentCreate("I'm having the same issue", "sana", 0, false, false, false);
-    let c6 = await commentCreate("I'm having the same issue", "doItYourself21", 0, false, false, false);
+    let c1 = await commentCreate("So many problems", "hamkalo", 4, false, false, false);
+    let c2 = await commentCreate("we need answers now!!!", "azad", 2, false, false, false);
+    let c3 = await commentCreate("this happens sometimes", "abaya", 1, false, false, false);
+    let c4 = await commentCreate("youtube helps a lot", "alia", 1, false, false, false);
+    let c5 = await commentCreate("I love programming", "sana", 0, false, false, false);
+    let c6 = await commentCreate("I don't really like programming", "doItYourself21", 0, false, false, false);
 
-    let c7 = await commentCreate("I'm having the same issue", "keepingItReal", 4, false, false, false);
-    let c8 = await commentCreate("I'm having the same issue", "alsoKeepingItReal", 2, false, false, false);
-    let c9 = await commentCreate("I'm having the same issue", "nicePerson", 1, false, false, false);
-    let c10 = await commentCreate("I'm having the same issue", "anotherNicePerson", 1, false, false, false);
-    let c11 = await commentCreate("I'm having the same issue", "motivationalSpeaker", 0, false, false, false);
-    let c12 = await commentCreate("I'm having the same issue", "cheaterGuy", 0, false, false, false);
-    let c13 = await commentCreate("I'm having the same issue", "lazyGuy23", 0, false, false, false);
-    let c14 = await commentCreate("I'm having the same issue", "academicallyHonestGuy", 0, false, false, false);
+    let c7 = await commentCreate("Try quora", "keepingItReal", 4, false, false, false);
+    let c8 = await commentCreate("I like yahoo answers", "alsoKeepingItReal", 2, false, false, false);
+    let c9 = await commentCreate(
+        "I wish these kinds of problems were easier to understand",
+        "nicePerson",
+        1,
+        false,
+        false,
+        false
+    );
+    let c10 = await commentCreate("try redux", "anotherNicePerson", 1, false, false, false);
+    let c11 = await commentCreate("you should make a web3 application", "motivationalSpeaker", 0, false, false, false);
+    let c12 = await commentCreate("react is overrated", "cheaterGuy", 0, false, false, false);
+    let c13 = await commentCreate("spring boot for life", "lazyGuy23", 0, false, false, false);
+    let c14 = await commentCreate("cheaters never prosper...", "academicallyHonestGuy", 0, false, false, false);
 
-    let c15 = await commentCreate("I'm having the same issue", "tooNice", 4, false, false, false);
-    let c16 = await commentCreate("I'm having the same issue", "alsoTooNice", 2, false, false, false);
-    let c17 = await commentCreate("I'm having the same issue", "K&Rplug", 1, false, false, false);
-    let c18 = await commentCreate("I'm having the same issue", "randomPerson3", 1, false, false, false);
+    let c15 = await commentCreate("I'm having the same problem", "tooNice", 4, false, false, false);
+    let c16 = await commentCreate("This is a common issue", "alsoTooNice", 2, false, false, false);
+    let c17 = await commentCreate("I am not surprised", "K&Rplug", 1, false, false, false);
+    let c18 = await commentCreate("This comes up a lot", "randomPerson3", 1, false, false, false);
 
-    let c19 = await commentCreate("I'm having the same issue", "tooNice", 4, false, false, false);
-    let c20 = await commentCreate("I'm having the same issue", "alsoTooNice", 2, false, false, false);
+    let c19 = await commentCreate("Reddit has good resources", "tooNice", 4, false, false, false);
+    let c20 = await commentCreate("Maybe try the real stackoverflow...", "alsoTooNice", 2, false, false, false);
 
-    let c21 = await commentCreate("I'm having the same issue", "tooNice", 4, false, false, false);
-    let c22 = await commentCreate("I'm having the same issue", "alsoTooNice", 2, false, false, false);
-    let c23 = await commentCreate("I'm having the same issue", "randomPerson3", 1, false, false, false);
+    let c21 = await commentCreate("A comment about programming", "tooNice", 4, false, false, false);
+    let c22 = await commentCreate("So many questions...", "alsoTooNice", 2, false, false, false);
+    let c23 = await commentCreate("What's this about?", "randomPerson3", 1, false, false, false);
 
     await questionCreate(
         "Programmatically navigate using React router",
@@ -271,7 +278,7 @@ const populate = async () => {
     await questionCreate(
         "can't figure out how to index through an array using pointers",
         "C array indexing",
-        "I am working on a C programming assignment that involves indexing through an array in C. The professor said we're not allowed to use brackets to index through the array. I have no idea how pointers work, and the assignment is due in two days. The TAs ignored me when I went to their office hours and the professor never answers his emails. My career depends on this.",
+        "I am working on a C programming assignment that involves indexing through an array in C. The professor said we're not allowed to use brackets to index through the array. I have no idea how pointers work, and the assignment is due in two days.",
         [t7, t8, t9, t10],
         [a13, a14, a15],
         "stressedStudent99",
@@ -284,7 +291,7 @@ const populate = async () => {
     await questionCreate(
         "how to write a program in C that will print out the first 100 prime numbers",
         "C programming exercise",
-        "I am working on an assignment and I am sOOOoOoO lost, please give me the answer...",
+        "I am working on an assignment and I am lost, please give me the answer...",
         [t7, t11],
         [a16, a17],
         "lazyGuy23",
